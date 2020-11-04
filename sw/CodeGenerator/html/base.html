@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<link rel="stylesheet" style="text/css" href="/style.css">
+<meta content="de" http-equiv="Content-Language" />
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>Rikatronic V</title>
+<style type="text/css">
+
+
+
+body {
+background-color: blue
+}
+
+.button {
+  display: inline-block;
+  padding: 15px 25px;
+  font-size: 24px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  color: #fff;
+  background-color: silver;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 9px darkblue;
+}
+
+.button:hover {background-color: #3e8e41}
+
+.button:active {
+  background-color: #3e8e41;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
+}
+
+.auto-style1 {
+	font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+	font-size: xx-large;
+	color: #FFFFFF;
+}
+.auto-style2 {
+	color: #FFFFFF;
+}
+.auto-style3 {
+	border-style: solid;
+	border-width: 1px;
+}
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 35px;
+  background: #silver;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 50px;
+  height: 35px;
+  background: darkred;
+  cursor: pointer;
+}
+</style>
+</head>
+<p class="auto-style1" align="center"><strong>Rikatronic V</strong></p>
+<table class="auto-style3" style="width: 100%">
+	<tr>
+		<td class="auto-style2" style="width: 484px"><strong>Ofentemperatur</strong></td>
+		<td class="auto-style2"><strong id="temp">{{ temp }}</strong></td>
+	</tr>
+	<tr>
+		<td class="auto-style2" style="width: 484px"><strong>Programm</strong></td>
+		<td class="auto-style2"><strong id="program">{{ program }}</strong></td>
+	</tr>
+	<tr>
+		<td class="auto-style2" style="width: 484px"><strong>Brennzeit</strong></td>
+		<td class="auto-style2"><strong id="time">{{ time }}</strong></td>
+	</tr>
+	<tr>
+		<td class="auto-style2" style="width: 484px"><strong>Klappe</strong></td>
+		<td class="auto-style2"><strong id="flap">{{ flap }} %</strong></td>
+	</tr>
+	<tr>
+		<td class="auto-style2" style="width: 484px"><strong>Modus</strong></td>
+		<td class="auto-style2"><strong id="mode">{{ mode }}</strong></td>
+	</tr>
+</table>
+</p>
+<table class="auto-style2" style="width: 100%">
+	<tr>
+		<td>
+			<form>
+				<p class="button" type="submit" onclick="power()">POWER</p>
+			</form>
+		</td>
+		<td>
+			<form >
+				<p class="button" type="submit" onclick="manual()">MANUAL</p>
+			</form>
+		</td>
+		<td>
+			<p>
+				<p class="button" type="submit" onclick="eco()">ECO</p>
+			</form>
+		</td>
+	</tr>
+</table>
+</p>
+<table  class="auto-style2" style="width: 100%">
+	<tr>
+		<div class="slidecontainer">
+			<input id="slider" type="range" min="1" max="100" value={{ flap }} class="slider" id="flap" onchange="huhu()">
+		</div>
+	</tr>
+</table>
+</p>
+<form action="submit" method="get" >
+	<button class="button" id="submitBtn" type="submit" name="action" value="{{ json }}" >übernehmen</button>
+</form>
+
+
+</body>
+
+</html>
+<script>
+
+	var values = {
+		"mode" : "ECO",
+		"flap" : "80",
+		"temp" : "85",
+		"program" : "Anheizen",
+		"time" : "10:25"}
+
+	document.getElementById("flap").innerHTML = values.flap + "%"
+	document.getElementById("slider").value = values.flap
+	document.getElementById("temp").innerHTML = values.temp + "°C"
+	document.getElementById("mode").innerHTML = values.mode
+	document.getElementById("time").innerHTML = values.time
+	document.getElementById("program").innerHTML = values.program
+	document.getElementById("submitBtn").value = JSON.stringify(values)
+
+	function power()
+	{
+	 	var anHttpRequest = new XMLHttpRequest();
+		values.mode = "POWER"
+		document.getElementById("mode").innerHTML = values.mode
+		document.getElementById("submitBtn").value = JSON.stringify(values)
+		anHttpRequest.open( "GET", "Rikatronic/power", true );
+		anHttpRequest.send( null );
+	}
+	function eco()
+	{
+		values.mode = "ECO"
+		document.getElementById("mode").innerHTML = values.mode
+		document.getElementById("submitBtn").value = JSON.stringify(values)
+	}
+	function manual()
+	{
+		values.mode = "MANUAL"
+		document.getElementById("mode").innerHTML = values.mode
+		document.getElementById("submitBtn").value = JSON.stringify(values)
+	}
+	function huhu()
+	{
+		if ("MANUAL" == values.mode)
+		{
+			values.flap = document.getElementById("slider").value
+			document.getElementById("flap").innerHTML = values.flap
+			document.getElementById("submitBtn").value = JSON.stringify(values)
+		}
+		else
+		{
+			document.getElementById("slider").value = values.flap
+		}
+	}
+
+</script>

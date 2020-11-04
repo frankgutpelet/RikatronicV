@@ -3,22 +3,30 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include "base.hpp"
+#include "flap.hpp"
 
 const char* ssid = "WMOSKITO";
 const char* password = ".ubX54bVSt#vxW11m.";
 
 ESP8266WebServer server(80);
+Flap flap(3,0,0);
+
 base indexPage(&server);
 
 void handleRoot() {
   indexPage.Render();
 }
 
-void handlePower() 
+void callback() 
 {
-  Serial.println("Power");
-  indexPage.Set_mode("POWER");
-  handleRoot();
+  if (String("do") == indexPage.Get_calibrated())
+  {
+    
+    indexPage.Set_calibrated("progress");
+    indexPage.Render();
+    /*TODO kalibrierung durchführen */
+  }
+  //handleRoot();
 }
 
 void handleNotFound() {
@@ -37,6 +45,15 @@ void handleNotFound() {
 }
 
 void setup(void) {
+
+  /* set all values for webpage */
+  indexPage.Set_program("ECO");
+  indexPage.Set_state("Off");
+  indexPage.Set_flap("0");
+  indexPage.Set_temp("20");
+  indexPage.Set_duration("00:00");
+  indexPage.Set_calibrated("false");
+  
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
   WiFi.hostname("RikatronicV");
@@ -60,7 +77,7 @@ void setup(void) {
 
   server.on("/", handleRoot);
     server.send(200, "text/plain", "this works as well");
-  indexPage.SetCallback_submit(handlePower); 
+  indexPage.SetCallback_submit(callback); 
 
   server.on("/gif", []() {
     static const uint8_t gif[] PROGMEM = {

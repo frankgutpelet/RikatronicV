@@ -9,9 +9,13 @@
 <style type="text/css">
 
 
-
+html {
+  background: linear-gradient(to bottom right, navy, black);
+ 	background-repeat: no-repeat;
+ 	min-height: 100%;
+}
 body {
-background-color: blue
+
 }
 
 .button {
@@ -28,8 +32,26 @@ background-color: blue
   border-radius: 10px;
   box-shadow: 0 9px darkblue;
 }
+.buttonsmall{
+  display: inline-block;
+  padding: 5px 5px;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  color: #fff;
+  background-color: silver;
+  border: none;
+  border-radius: 3px;
+  box-shadow: 0 3px darkblue;
+  bottom: 5%;
+  position: fixed;
+  }
 
-.button:hover {background-color: #3e8e41}
+.button:hover {
+	background-color: blueviolet
+}
 
 .button:active {
   background-color: #3e8e41;
@@ -44,6 +66,9 @@ background-color: blue
 }
 .auto-style2 {
 	color: #FFFFFF;
+}
+.auto-style3 {
+	color: #FF0000;
 }
 .auto-style3 {
 	border-style: solid;
@@ -67,29 +92,46 @@ background-color: blue
   background: darkred;
   cursor: pointer;
 }
+#CalibrationProgress {
+  width: 50%;
+  background-color: grey;
+  bottom: 20%;
+  position: fixed;
+  float: right;
+  visible: false;
+  box-shadow: 8px 8px 5px #444;
+}
+
+#CalibrationBar {
+  width: 1%;
+  height: 30px;
+  background-color: green;
+}
+
 </style>
 </head>
+<body>
 <p class="auto-style1" align="center"><strong>Rikatronic V</strong></p>
 <table class="auto-style3" style="width: 100%">
 	<tr>
 		<td class="auto-style2" style="width: 484px"><strong>Ofentemperatur</strong></td>
-		<td class="auto-style2"><strong id="temp">{{ temp }}</strong></td>
+		<td class="auto-style2"><strong id="temp"></strong></td>
 	</tr>
 	<tr>
 		<td class="auto-style2" style="width: 484px"><strong>Programm</strong></td>
-		<td class="auto-style2"><strong id="program">{{ program }}</strong></td>
+		<td class="auto-style2"><strong id="program"></strong></td>
 	</tr>
 	<tr>
 		<td class="auto-style2" style="width: 484px"><strong>Brennzeit</strong></td>
-		<td class="auto-style2"><strong id="time">{{ time }}</strong></td>
+		<td class="auto-style2"><strong id="duration"></strong></td>
 	</tr>
 	<tr>
 		<td class="auto-style2" style="width: 484px"><strong>Klappe</strong></td>
-		<td class="auto-style2"><strong id="flap">{{ flap }} %</strong></td>
+		<td id="flapColumn" class="auto-style2"><strong id="flap"></strong></td>
 	</tr>
 	<tr>
 		<td class="auto-style2" style="width: 484px"><strong>Modus</strong></td>
-		<td class="auto-style2"><strong id="mode">{{ mode }}</strong></td>
+		<td class="auto-style2"><strong id="state"></strong></td>
 	</tr>
 </table>
 </p>
@@ -116,7 +158,7 @@ background-color: blue
 <table  class="auto-style2" style="width: 100%">
 	<tr>
 		<div class="slidecontainer">
-			<input id="slider" type="range" min="1" max="100" value={{ flap }} class="slider" id="flap" onchange="huhu()">
+			<input id="slider" type="range" min="1" max="100" value={{ flap }} class="slider" id="flap" onchange="sliderChange()">
 		</div>
 	</tr>
 </table>
@@ -124,7 +166,10 @@ background-color: blue
 <form action="submit" method="get" >
 	<button class="button" id="submitBtn" type="submit" name="action" value="{{ json }}" >übernehmen</button>
 </form>
-
+<p class="buttonsmall" type="submit" onclick="calibrate()()">Kalibrieren</p>
+<div id="CalibrationProgress">
+  <div id="CalibrationBar"></div>
+</div>
 
 </body>
 
@@ -132,44 +177,98 @@ background-color: blue
 <script>
 
 	var values = {
-		"mode" : "ECO",
+		"state" : "ECO",
 		"flap" : "80",
 		"temp" : "85",
 		"program" : "Anheizen",
-		"time" : "10:25"}
+		"duration" : "10:25",
+		"calibrated" : "false"}
 
-	document.getElementById("flap").innerHTML = values.flap + "%"
+	if("false" == values.calibrated)
+	{
+		alert("Drosselklappe ist nicht kalibriert. Bitte Drosselklappe kalibrieren")
+		document.getElementById("flap").innerHTML = "nicht kalibriert"
+	}
+	else
+	{
+		document.getElementById("flap").innerHTML = values.flap + "%"
+	}
+
 	document.getElementById("slider").value = values.flap
 	document.getElementById("temp").innerHTML = values.temp + "°C"
-	document.getElementById("mode").innerHTML = values.mode
-	document.getElementById("time").innerHTML = values.time
+	document.getElementById("state").innerHTML = values.state
+	document.getElementById("duration").innerHTML = values.duration
 	document.getElementById("program").innerHTML = values.program
 	document.getElementById("submitBtn").value = JSON.stringify(values)
 
+	if("progress" == values.calibrated)
+	{
+
+		var elem = document.getElementById("CalibrationBar");
+		document.getElementById("flap").innerHTML = "wird kalibriert"
+		document.getElementById("flapColumn").classList.remove("auto-style2")
+		document.getElementById("flapColumn").classList.add("auto-style3")
+		var width = 1;
+		var id = setInterval(frame, 1400);
+		function frame()
+		{
+			if (width >= 100)
+			{
+				clearInterval(id);
+			}
+			else
+			{
+				width++;
+				elem.style.width = width + "%";
+			}
+		}
+		setTimeout(function()
+		{
+  			location.reload()
+		}, 140000);
+
+
+  	}
+	else
+	{
+		document.getElementById("CalibrationProgress").hidden = true
+	}
+
+	function calibrate()
+	{
+		if (confirm("Das kalibrieren der Drosselklappe dauert ca. 2-3 Minuten"))
+		{
+			document.getElementById("flap").innerHTML = "übernehmen um zu kalibrieren"
+			document.getElementById("flapColumn").classList.remove("auto-style2")
+			document.getElementById("flapColumn").classList.add("auto-style3")
+			values.calibrated = "do"
+			document.getElementById("submitBtn").value = JSON.stringify(values)
+		}
+	}
 	function power()
 	{
 	 	var anHttpRequest = new XMLHttpRequest();
-		values.mode = "POWER"
-		document.getElementById("mode").innerHTML = values.mode
+		values.state = "POWER"
+		document.getElementById("state").innerHTML = values.state
 		document.getElementById("submitBtn").value = JSON.stringify(values)
 		anHttpRequest.open( "GET", "Rikatronic/power", true );
 		anHttpRequest.send( null );
 	}
 	function eco()
 	{
-		values.mode = "ECO"
-		document.getElementById("mode").innerHTML = values.mode
+		values.state = "ECO"
+		document.getElementById("state").innerHTML = values.state
 		document.getElementById("submitBtn").value = JSON.stringify(values)
 	}
 	function manual()
 	{
-		values.mode = "MANUAL"
-		document.getElementById("mode").innerHTML = values.mode
+		values.state = "MANUAL"
+		document.getElementById("state").innerHTML = values.state
 		document.getElementById("submitBtn").value = JSON.stringify(values)
 	}
-	function huhu()
+	function sliderChange()
 	{
-		if ("MANUAL" == values.mode)
+		if ("MANUAL" == values.state)
 		{
 			values.flap = document.getElementById("slider").value
 			document.getElementById("flap").innerHTML = values.flap

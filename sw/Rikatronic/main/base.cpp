@@ -1,8 +1,7 @@
 #include "base.hpp"
 #include <ArduinoJson.h>
 
-StaticJsonDocument<300> doc;
-
+StaticJsonDocument < 300 > doc;
 char base_text[] = "﻿<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n\
 <html xmlns=\"http://www.w3.org/1999/xhtml\">\n\
 \n\
@@ -14,9 +13,13 @@ char base_text[] = "﻿<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitiona
 <style type=\"text/css\">\n\
 \n\
 \n\
-\n\
+html {\n\
+  background: linear-gradient(to bottom right, navy, black);\n\
+ 	background-repeat: no-repeat;\n\
+ 	min-height: 100%;\n\
+}\n\
 body {\n\
-background-color: blue\n\
+\n\
 }\n\
 \n\
 .button {\n\
@@ -33,8 +36,26 @@ background-color: blue\n\
   border-radius: 10px;\n\
   box-shadow: 0 9px darkblue;\n\
 }\n\
+.buttonsmall{\n\
+  display: inline-block;\n\
+  padding: 5px 5px;\n\
+  font-size: 14px;\n\
+  cursor: pointer;\n\
+  text-align: center;\n\
+  text-decoration: none;\n\
+  outline: none;\n\
+  color: #fff;\n\
+  background-color: silver;\n\
+  border: none;\n\
+  border-radius: 3px;\n\
+  box-shadow: 0 3px darkblue;\n\
+  bottom: 5%;\n\
+  position: fixed;\n\
+  }\n\
 \n\
-.button:hover {background-color: #3e8e41}\n\
+.button:hover {\n\
+	background-color: blueviolet\n\
+}\n\
 \n\
 .button:active {\n\
   background-color: #3e8e41;\n\
@@ -49,6 +70,9 @@ background-color: blue\n\
 }\n\
 .auto-style2 {\n\
 	color: #FFFFFF;\n\
+}\n\
+.auto-style3 {\n\
+	color: #FF0000;\n\
 }\n\
 .auto-style3 {\n\
 	border-style: solid;\n\
@@ -72,29 +96,46 @@ background-color: blue\n\
   background: darkred;\n\
   cursor: pointer;\n\
 }\n\
+#CalibrationProgress {\n\
+  width: 50%;\n\
+  background-color: grey;\n\
+  bottom: 20%;\n\
+  position: fixed;\n\
+  float: right;\n\
+  visible: false;\n\
+  box-shadow: 8px 8px 5px #444;\n\
+}\n\
+\n\
+#CalibrationBar {\n\
+  width: 1%;\n\
+  height: 30px;\n\
+  background-color: green;\n\
+}\n\
+\n\
 </style>\n\
 </head>\n\
+<body>\n\
 <p class=\"auto-style1\" align=\"center\"><strong>Rikatronic V</strong></p>\n\
 <table class=\"auto-style3\" style=\"width: 100%\">\n\
 	<tr>\n\
 		<td class=\"auto-style2\" style=\"width: 484px\"><strong>Ofentemperatur</strong></td>\n\
-		<td class=\"auto-style2\"><strong id=\"temp\">{{ temp }}</strong></td>\n\
+		<td class=\"auto-style2\"><strong id=\"temp\"></strong></td>\n\
 	</tr>\n\
 	<tr>\n\
 		<td class=\"auto-style2\" style=\"width: 484px\"><strong>Programm</strong></td>\n\
-		<td class=\"auto-style2\"><strong id=\"program\">{{ program }}</strong></td>\n\
+		<td class=\"auto-style2\"><strong id=\"program\"></strong></td>\n\
 	</tr>\n\
 	<tr>\n\
 		<td class=\"auto-style2\" style=\"width: 484px\"><strong>Brennzeit</strong></td>\n\
-		<td class=\"auto-style2\"><strong id=\"time\">{{ time }}</strong></td>\n\
+		<td class=\"auto-style2\"><strong id=\"duration\"></strong></td>\n\
 	</tr>\n\
 	<tr>\n\
 		<td class=\"auto-style2\" style=\"width: 484px\"><strong>Klappe</strong></td>\n\
-		<td class=\"auto-style2\"><strong id=\"flap\">{{ flap }} %</strong></td>\n\
+		<td id=\"flapColumn\" class=\"auto-style2\"><strong id=\"flap\"></strong></td>\n\
 	</tr>\n\
 	<tr>\n\
 		<td class=\"auto-style2\" style=\"width: 484px\"><strong>Modus</strong></td>\n\
-		<td class=\"auto-style2\"><strong id=\"mode\">{{ mode }}</strong></td>\n\
+		<td class=\"auto-style2\"><strong id=\"state\"></strong></td>\n\
 	</tr>\n\
 </table>\n\
 </p>\n\
@@ -121,7 +162,7 @@ background-color: blue\n\
 <table  class=\"auto-style2\" style=\"width: 100%\">\n\
 	<tr>\n\
 		<div class=\"slidecontainer\">\n\
-			<input id=\"slider\" type=\"range\" min=\"1\" max=\"100\" value={{ flap }} class=\"slider\" id=\"flap\" onchange=\"huhu()\">\n\
+			<input id=\"slider\" type=\"range\" min=\"1\" max=\"100\" value={{ flap }} class=\"slider\" id=\"flap\" onchange=\"sliderChange()\">\n\
 		</div>\n\
 	</tr>\n\
 </table>\n\
@@ -129,7 +170,10 @@ background-color: blue\n\
 <form action=\"submit\" method=\"get\" >\n\
 	<button class=\"button\" id=\"submitBtn\" type=\"submit\" name=\"action\" value=\"{{ json }}\" >übernehmen</button>\n\
 </form>\n\
-\n\
+<p class=\"buttonsmall\" type=\"submit\" onclick=\"calibrate()()\">Kalibrieren</p>\n\
+<div id=\"CalibrationProgress\">\n\
+  <div id=\"CalibrationBar\"></div>\n\
+</div>\n\
 \n\
 </body>\n\
 \n\
@@ -137,42 +181,98 @@ background-color: blue\n\
 <script>\n\
 \n\
 	var values = {\n\
-		\"mode\" : \"ECO\",                 \n\
-		\"flap\" : \"80\",                  \n\
-		\"temp\" : \"85\",                  \n\
-		\"program\" : \"Anheizen\",         \n\
-		\"time\" : \"10:25\"}               \n\
-	document.getElementById(\"flap\").innerHTML = values.flap + \"%\"\n\
+		\"state\" : \"ECO\",            \n\
+		\"flap\" : \"80\",              \n\
+		\"temp\" : \"85\",              \n\
+		\"program\" : \"Anheizen\",     \n\
+		\"duration\" : \"10:25\",       \n\
+		\"calibrated\" : \"false\"}     \n\
+\n\
+	if(\"false\" == values.calibrated)\n\
+	{\n\
+		alert(\"Drosselklappe ist nicht kalibriert. Bitte Drosselklappe kalibrieren\")\n\
+		document.getElementById(\"flap\").innerHTML = \"nicht kalibriert\"\n\
+	}\n\
+	else\n\
+	{\n\
+		document.getElementById(\"flap\").innerHTML = values.flap + \"%\"\n\
+	}\n\
+\n\
 	document.getElementById(\"slider\").value = values.flap\n\
 	document.getElementById(\"temp\").innerHTML = values.temp + \"°C\"\n\
-	document.getElementById(\"mode\").innerHTML = values.mode\n\
-	document.getElementById(\"time\").innerHTML = values.time\n\
+	document.getElementById(\"state\").innerHTML = values.state\n\
+	document.getElementById(\"duration\").innerHTML = values.duration\n\
 	document.getElementById(\"program\").innerHTML = values.program\n\
+	document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
 \n\
+	if(\"progress\" == values.calibrated)\n\
+	{\n\
+\n\
+		var elem = document.getElementById(\"CalibrationBar\");\n\
+		document.getElementById(\"flap\").innerHTML = \"wird kalibriert\"\n\
+		document.getElementById(\"flapColumn\").classList.remove(\"auto-style2\")\n\
+		document.getElementById(\"flapColumn\").classList.add(\"auto-style3\")\n\
+		var width = 1;\n\
+		var id = setInterval(frame, 1400);\n\
+		function frame()\n\
+		{\n\
+			if (width >= 100)\n\
+			{\n\
+				clearInterval(id);\n\
+			}\n\
+			else\n\
+			{\n\
+				width++;\n\
+				elem.style.width = width + \"%\";\n\
+			}\n\
+		}\n\
+		setTimeout(function()\n\
+		{\n\
+  			location.reload()\n\
+		}, 140000);\n\
+\n\
+\n\
+  	}\n\
+	else\n\
+	{\n\
+		document.getElementById(\"CalibrationProgress\").hidden = true\n\
+	}\n\
+\n\
+	function calibrate()\n\
+	{\n\
+		if (confirm(\"Das kalibrieren der Drosselklappe dauert ca. 2-3 Minuten\"))\n\
+		{\n\
+			document.getElementById(\"flap\").innerHTML = \"übernehmen um zu kalibrieren\"\n\
+			document.getElementById(\"flapColumn\").classList.remove(\"auto-style2\")\n\
+			document.getElementById(\"flapColumn\").classList.add(\"auto-style3\")\n\
+			values.calibrated = \"do\"\n\
+			document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
+		}\n\
+	}\n\
 	function power()\n\
 	{\n\
 	 	var anHttpRequest = new XMLHttpRequest();\n\
-		values.mode = \"POWER\"\n\
-		document.getElementById(\"mode\").innerHTML = values.mode\n\
+		values.state = \"POWER\"\n\
+		document.getElementById(\"state\").innerHTML = values.state\n\
 		document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
 		anHttpRequest.open( \"GET\", \"Rikatronic/power\", true );\n\
 		anHttpRequest.send( null );\n\
 	}\n\
 	function eco()\n\
 	{\n\
-		values.mode = \"ECO\"\n\
-		document.getElementById(\"mode\").innerHTML = values.mode\n\
+		values.state = \"ECO\"\n\
+		document.getElementById(\"state\").innerHTML = values.state\n\
 		document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
 	}\n\
 	function manual()\n\
 	{\n\
-		values.mode = \"MANUAL\"\n\
-		document.getElementById(\"mode\").innerHTML = values.mode\n\
+		values.state = \"MANUAL\"\n\
+		document.getElementById(\"state\").innerHTML = values.state\n\
 		document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
 	}\n\
-	function huhu()\n\
+	function sliderChange()\n\
 	{\n\
-		if (\"MANUAL\" == values.mode)\n\
+		if (\"MANUAL\" == values.state)\n\
 		{\n\
 			values.flap = document.getElementById(\"slider\").value\n\
 			document.getElementById(\"flap\").innerHTML = values.flap\n\
@@ -189,127 +289,156 @@ background-color: blue\n\
 base::base(ESP8266WebServer* server)
 {
 	this->server = server;
-  this->Submit_UserCallback = (void (*)()) NULL;
-  this->server->on("/submit", std::bind(&base::Submit_Callback, this));  
+	this->submit_UserCallback = (void(*)()) NULL;
+	this->server->on("/submit", std::bind( & base::Submit_Callback, this));
 }
-
-void base::Submit_Callback (void)
+void base::Submit_Callback(void)
 {
-  String jsonstring = this->server->arg("action");
-  DeserializationError error = deserializeJson(doc, jsonstring);
-  Serial.println(jsonstring);
-  JsonObject obj = doc.as<JsonObject>();
+	String jsonstring = this->server->arg("action");
+	DeserializationError error = deserializeJson(doc, jsonstring);
+	Serial.println(jsonstring);
+	JsonObject obj = doc.as < JsonObject > ();
 
-  if (error) 
-  {
-    Serial.print(F("deserializeJson() failed: "));
-    Serial.println(error.f_str());
-  }
-  else
-  {
-    this->duration = obj["time"].as<String>();
-    this->state = obj["mode"].as<String>();
-    this->program = obj["program"].as<String>();
-    this->temp = obj["temp"].as<String>();
-    this->flap = obj["flap"].as<String>();
+	if (error)
+	{
+	Serial.print(F("deserializeJson() failed: "));
+	Serial.println(error.f_str());
+	}
+	else
+	{
+		this->state = obj["state"].as < String > ();
+		this->duration = obj["duration"].as < String > ();
+		this->program = obj["program"].as < String > ();
+		this->flap = obj["flap"].as < String > ();
+		this->temp = obj["temp"].as < String > ();
+		this->calibrated = obj["calibrated"].as < String > ();
 
-    this->Replace("time", this->duration);
-    this->Replace("mode", this->state);
-    this->Replace("program", this->program);
-    this->Replace("temp", this->temp);
-    this->Replace("flap", this->flap);
-    
-
-    //sprintf(javaScriptValues, "var values = {\n\"mode\" : \"%s\",\n\"flap\" : \"%s\%\",\n\"temp\" : \"%s\",\n\"program\" : \"%s\",\n\"time\" : \"%s\"}\n", state, flap, temp, program, duration);
-  }
-  
-  if (NULL != this->Submit_UserCallback)
-  {
-    this->Submit_UserCallback();
-  }
+	}
+	if (NULL != this->submit_UserCallback)
+	{
+		this->submit_UserCallback();
+	}
 }
 
 void base::SetCallback_submit (void (*callback)(void))
 {
-  this->Submit_UserCallback = callback;
+	this->submit_UserCallback = callback;
 }
 
-void base::Set_time (String value)
+void base::Set_state (String value)
+{
+	this->state = value;
+}
+
+String base::Get_state ( void )
+{
+	return this->state;
+}
+void base::Set_duration (String value)
 {
 	this->duration = value;
 }
 
-void base::Set_mode (String value)
+String base::Get_duration ( void )
 {
-	this->duration = value;
+	return this->duration;
 }
-
 void base::Set_program (String value)
 {
 	this->program = value;
 }
 
-void base::Set_temp (String value)
+String base::Get_program ( void )
 {
-	this->temp = value;
+	return this->program;
 }
-
 void base::Set_flap (String value)
 {
 	this->flap = value;
 }
 
+String base::Get_flap ( void )
+{
+	return this->flap;
+}
+void base::Set_temp (String value)
+{
+	this->temp = value;
+}
+
+String base::Get_temp ( void )
+{
+	return this->temp;
+}
+void base::Set_calibrated (String value)
+{
+	this->calibrated = value;
+}
+
+String base::Get_calibrated ( void )
+{
+	return this->calibrated;
+}
 void base::Render( void )
 {
- this->server->send( 200, base_text);
+		this->Replace("state", this->state);
+		this->Replace("duration", this->duration);
+		this->Replace("program", this->program);
+		this->Replace("flap", this->flap);
+		this->Replace("temp", this->temp);
+		this->Replace("calibrated", this->calibrated);
+	this->server->send( 200, base_text );
 }
-
 void base::Replace(String var, String val)
 {
-  int varLength = var.length() + 1;
-  int valLength = val.length() + 1;
-  
-  char varName[varLength];
-  char value[valLength];
-  char tmpVarName[varLength];
-  var.toCharArray(varName, varLength);
-  val.toCharArray(value, valLength);
-
-  Serial.println("Search for " + var + ";");
-  for (int i=0; i<sizeof(base_text); i++)
-  { 
-    if ('\n' == base_text[i-1])
-    {
-      memcpy(tmpVarName, &base_text[i+3], varLength);
-      tmpVarName[varLength - 1] = '\0';
-      if ((0 == strcmp(varName, tmpVarName))&&('\"' == base_text[i+2])&&('\"' == base_text[i+2+varLength]))
-      { 
-        /* replace variable and set iterator to endo of line  */
-        i = this->ReplaceJSVariable((i+7+varLength), varName, value, valLength);       
-      } 
-    }
-  }
+	int varLength = var.length() + 1;
+	int valLength = val.length() + 1;
+	char varName[varLength];
+	char value[valLength];
+	char tmpVarName[varLength];
+	var.toCharArray(varName, varLength);
+	val.toCharArray(value, valLength);
+#ifdef DEBUG
+	 Serial.println("Search for calibrated");
+#endif
+	for (int i=0; i < sizeof(base_text); i++)
+	{
+		if ('\n' == base_text[i-1])
+		{
+			memcpy(tmpVarName, & base_text[i+3], varLength);
+			tmpVarName[varLength - 1] = '\0';
+			if ((0 == strcmp(varName, tmpVarName)) && ('\"' == base_text[i+2]) && ('\"' == base_text[i+2+varLength]))
+			{
+				/* replace variable and set iterator to end of line */
+				i = this->ReplaceJSVariable((i+7+varLength), varName, value, valLength);
+			}
+		}
+	}
 }
-
-int base::ReplaceJSVariable(int index, const char* varName, const char* value, int valLength)
+int base::ReplaceJSVariable(int index, const char * varName, const char * value, int valLength)
 {
-  Serial.println(String("Found variable: ") + varName + " first char: " + base_text[index]);
-  char lastChar = ' ';
-  /* delete value in line  */
-  int endOfLine = index;
-  do 
-  {
-    if (' ' != base_text[endOfLine])
-    {
-      lastChar = base_text[endOfLine];
-    }  
-    base_text[endOfLine] = ' ';
-    endOfLine++;
-  }while(base_text[endOfLine] != '\n');
+	char lastChar = ' ';
+	int endOfLine = index;
+#ifdef DEBUG
+	Serial.println(String("Found variable: ") + varName + " first char: " + base_text[index]);
+#endif
 
-  Serial.println("Value deleted");
-  memcpy(&base_text[index], value, (valLength - 1));
-  base_text[(index + valLength - 1)] = '\"';
-  base_text[(index + valLength)] = lastChar;
-  return endOfLine;
+
+	/*delete value in line */
+	do
+	{
+		if (' ' != base_text[endOfLine])
+		{
+			lastChar = base_text[endOfLine];
+		}
+		base_text[endOfLine] = ' ';
+		endOfLine ++;
+	}while (base_text[endOfLine] != '\n');
+#ifdef DEBUG
+	Serial.println("Value deleted");
+#endif
+	memcpy( &base_text[index], value, (valLength - 1));
+	base_text[(index + valLength - 1)] = '\"';
+	base_text[(index + valLength)] = lastChar;
+	return endOfLine;
 }

@@ -81,7 +81,7 @@ def printClass(side):
     source.write("\tvar.toCharArray(varName, varLength);\n")
     source.write("\tval.toCharArray(value, valLength);\n")
 
-    source.write("#ifdef DEBUG\n\t Serial.println(\"Search for " + var + "\");\n#endif\n")
+    source.write("#ifdef DEBUG\n\t Serial.println(\"Search for \" + var + \");\n#endif\n")
     source.write("\tfor (int i=0; i < sizeof(base_text); i++)\n\t{\n")
     source.write("\t\tif ('\\n' == base_text[i-1])\n\t\t{\n")
     source.write("\t\t\tmemcpy(tmpVarName, & base_text[i+3], varLength);\n")

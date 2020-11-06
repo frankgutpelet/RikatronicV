@@ -5,18 +5,11 @@ extern "C" {
 class Flap
 {
 public:
-  typedef enum tag_error_e
-  {
-    ERROR_NOT_CALIBRATED = 255,
-    ERROR_WRONG_CALIBRATED = 254
-  }error_e;
   typedef void (Flap::*flapFctPointer)(void);
 
   typedef enum tag_FlapProgramState_e
   {
     FLAP_PROGRAM_STATE_NONE = 0,
-    FLAP_PROGRAM_STATE_CALIBRATION_LOW,
-    FLAP_PROGRAM_STATE_CALIBRATION_HIGH,
     FLAP_PROGRAM_STATE_COUNT
   }FlapProgramState_e;
 
@@ -28,13 +21,11 @@ public:
     FLAP_MODE_Count
   }flapMode_e;
     
-	Flap(int pwmPin, int relaisPin, int adcPin,  int adcTmpPin);
+	Flap(int pwmPin, int relaisPin,  int adcTmpPin);
 	void SetPosition(int percentage);
 	void SwitchOn();
 	void SwitchOff();
 	int GetPosition();
-  void Calibrate(); //Dauert 2:10 min
-  bool IsCalibrated();
   int GetTemp();
   void ProgramStateMachine();
   void SetMode(flapMode_e state);
@@ -47,10 +38,7 @@ private:
   
   int action_timeSec;
   FlapProgramState_e programState;
-  bool isCalibrated;
-  int calibrationFactorLow;
-  int calibrationFactorHigh;
-  int adcPin, pwmPin, relaisPin, adcTmpPin;
+  int pwmPin, relaisPin, adcTmpPin;
 	int position;
 	bool isOn;
   flapMode_e state;

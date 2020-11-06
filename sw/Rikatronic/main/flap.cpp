@@ -9,19 +9,15 @@
 
 void timerCallback(void *pArg);
 
-Flap::Flap(int pwmPin, int relaisPin, int adcPin, int adcTmpPin)
+Flap::Flap(int pwmPin, int relaisPin, int adcTmpPin)
 {
   this->pwmPin = pwmPin;
   this->relaisPin = relaisPin;
-  this->adcPin = adcPin;
   this->adcTmpPin = adcTmpPin;
-  
-  pinMode(pwmPin, OUTPUT);
-  pinMode(relaisPin, OUTPUT);
-  pinMode(adcPin, INPUT);
+ 
+  pinMode(relaisPin, OUTPUT);;
   pinMode(adcTmpPin, INPUT);
   this->isOn = false;
-  this->isCalibrated = false;
   os_timer_setfn(&(this->timer), timerCallback, this);
   //os_timer_setfn(&(this->timer), std::bind( & Flap::SetPosition, this))
   os_timer_arm(&(this->timer), 1000, true);
@@ -31,6 +27,7 @@ Flap::Flap(int pwmPin, int relaisPin, int adcPin, int adcTmpPin)
 
 void Flap::SetPosition(int percentage)
 {
+  this->position = percentage;
   analogWrite(this->pwmPin, percentage * PWM_FACTOR;
 }
 
@@ -46,29 +43,7 @@ void Flap::SwitchOff()
 
 int Flap::GetPosition()
 {
-  Serial.println(String("Flap value: ") + String(analogRead(adcPin)));
-  if(!this->isCalibrated)
-  {
-    return ERROR_NOT_CALIBRATED;
-  }
-
-  if (0 >= (this->calibrationFactorHigh - this->calibrationFactorLow))
-  {
-    return ERROR_WRONG_CALIBRATED;
-  }
-  
-  return (int)((double)analogRead(adcPin) - this->calibrationFactorLow) * 100 / (this->calibrationFactorHigh - this->calibrationFactorLow);
-}
-bool Flap::IsCalibrated()
-{
-  return this->isCalibrated;
-}
-
-void Flap::Calibrate()
-{
-  this->SwitchOff();
-  this->action_timeSec = 10;
-  this->programState = FLAP_PROGRAM_STATE_CALIBRATION_LOW;
+  return this->position;
 }
 
 int Flap::GetTemp()
@@ -99,27 +74,6 @@ void Flap::ProgramStateMachine()
   {
     this->action_timeSec--;
     return;
-  }
-  
-  switch (this->programState)
-  {
-    case Flap::FLAP_PROGRAM_STATE_CALIBRATION_LOW: /* after 10sec  */
-      this->calibrationFactorLow = analogRead(this->adcPin);
-      Serial.println(String("Calibration Low value: ") + String(this->calibrationFactorLow)); 
-      this->SwitchOn(); 
-      this->SetPosition(100);
-      this->action_timeSec = 120;
-      this->programState = Flap::FLAP_PROGRAM_STATE_CALIBRATION_HIGH;
-      return;
-    case Flap::FLAP_PROGRAM_STATE_CALIBRATION_HIGH: /* after 2 min  */
-      this->calibrationFactorHigh = analogRead(this->adcPin);
-      Serial.println(String("Calibration High value: ") + String(this->calibrationFactorHigh)); 
-      this->isCalibrated = true;
-      this->programState = Flap::FLAP_PROGRAM_STATE_NONE;
-      return;
-    case Flap::FLAP_PROGRAM_STATE_NONE:
-    default:
-      return;
   }
 }
 

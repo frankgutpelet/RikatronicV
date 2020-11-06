@@ -32,23 +32,6 @@ body {
   border-radius: 10px;
   box-shadow: 0 9px darkblue;
 }
-.buttonsmall{
-  display: inline-block;
-  padding: 5px 5px;
-  font-size: 14px;
-  cursor: pointer;
-  text-align: center;
-  text-decoration: none;
-  outline: none;
-  color: #fff;
-  background-color: silver;
-  border: none;
-  border-radius: 3px;
-  box-shadow: 0 3px darkblue;
-  bottom: 5%;
-  position: fixed;
-  }
-
 .button:hover {
 	background-color: blueviolet
 }
@@ -166,10 +149,6 @@ body {
 <form action="submit" method="get" >
 	<button class="button" id="submitBtn" type="submit" name="action" value="{{ json }}" >übernehmen</button>
 </form>
-<p id="calibrateBtn" class="buttonsmall" type="submit" onclick="calibrate()()">Kalibrieren</p>
-<div id="CalibrationProgress">
-  <div id="CalibrationBar"></div>
-</div>
 
 </body>
 
@@ -177,24 +156,15 @@ body {
 <script>
 
 	var values = {
-		"state" : "ECO",
-		"flap" : "80",
-		"temp" : "85",
-		"program" : "Anheizen",
-		"duration" : "10:25",
-		"calibrated" : "false"}
+		"state" : "0",
+		"flap" : "0",
+		"temp" : "0",
+		"program" : "0",
+		"duration" : "0",
+		"calibrated" : "0"}
 
-	if("false" == values.calibrated)
-	{
-		alert("Drosselklappe ist nicht kalibriert. Bitte Drosselklappe kalibrieren")
-		document.getElementById("flap").innerHTML = "nicht kalibriert"
-	}
-	else
-	{
-		document.getElementById("flap").innerHTML = values.flap + "%"
-		document.getElementById("calibrateBtn").hidden = true
-	}
 
+	document.getElementById("flap").innerHTML = values.flap + "%"
 	document.getElementById("slider").value = values.flap
 	document.getElementById("temp").innerHTML = values.temp + "°C"
 	document.getElementById("state").innerHTML = values.state
@@ -207,45 +177,6 @@ body {
 	values.duration = ""
 	values.program = ""
 
-	if("progress" == values.calibrated)
-	{
-
-		var elem = document.getElementById("CalibrationBar");
-		document.getElementById("flap").innerHTML = "wird kalibriert"
-		document.getElementById("flapColumn").classList.remove("auto-style2")
-		document.getElementById("flapColumn").classList.add("auto-style3")
-		var width = 1;
-		var id = setInterval(frame, 1400);
-		function frame()
-		{
-			if (width >= 100)
-			{
-				clearInterval(id);
-				location.reload()
-			}
-			else
-			{
-				width++;
-				elem.style.width = width + "%";
-			}
-		}
-  	}
-	else
-	{
-		document.getElementById("CalibrationProgress").hidden = true
-	}
-
-	function calibrate()
-	{
-		if (confirm("Das kalibrieren der Drosselklappe dauert ca. 2-3 Minuten"))
-		{
-			document.getElementById("flap").innerHTML = "übernehmen um zu kalibrieren"
-			document.getElementById("flapColumn").classList.remove("auto-style2")
-			document.getElementById("flapColumn").classList.add("auto-style3")
-			values.calibrated = "do"
-			document.getElementById("submitBtn").value = JSON.stringify(values)
-		}
-	}
 	function power()
 	{
 	 	var anHttpRequest = new XMLHttpRequest();

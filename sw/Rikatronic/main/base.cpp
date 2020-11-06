@@ -36,23 +36,6 @@ body {\n\
   border-radius: 10px;\n\
   box-shadow: 0 9px darkblue;\n\
 }\n\
-.buttonsmall{\n\
-  display: inline-block;\n\
-  padding: 5px 5px;\n\
-  font-size: 14px;\n\
-  cursor: pointer;\n\
-  text-align: center;\n\
-  text-decoration: none;\n\
-  outline: none;\n\
-  color: #fff;\n\
-  background-color: silver;\n\
-  border: none;\n\
-  border-radius: 3px;\n\
-  box-shadow: 0 3px darkblue;\n\
-  bottom: 5%;\n\
-  position: fixed;\n\
-  }\n\
-\n\
 .button:hover {\n\
 	background-color: blueviolet\n\
 }\n\
@@ -170,10 +153,6 @@ body {\n\
 <form action=\"submit\" method=\"get\" >\n\
 	<button class=\"button\" id=\"submitBtn\" type=\"submit\" name=\"action\" value=\"{{ json }}\" >übernehmen</button>\n\
 </form>\n\
-<p id=\"calibrateBtn\" class=\"buttonsmall\" type=\"submit\" onclick=\"calibrate()()\">Kalibrieren</p>\n\
-<div id=\"CalibrationProgress\">\n\
-  <div id=\"CalibrationBar\"></div>\n\
-</div>\n\
 \n\
 </body>\n\
 \n\
@@ -181,24 +160,15 @@ body {\n\
 <script>\n\
 \n\
 	var values = {\n\
-		\"state\" : \"ECO\",            \n\
-		\"flap\" : \"80\",              \n\
-		\"temp\" : \"85\",              \n\
-		\"program\" : \"Anheizen\",     \n\
-		\"duration\" : \"10:25\",       \n\
-		\"calibrated\" : \"false\"}     \n\
+		\"state\" : \"0\",              \n\
+		\"flap\" : \"0\",               \n\
+		\"temp\" : \"0\",               \n\
+		\"program\" : \"0\",            \n\
+		\"duration\" : \"0\",           \n\
+		\"calibrated\" : \"0\"}         \n\
 \n\
-	if(\"false\" == values.calibrated)\n\
-	{\n\
-		alert(\"Drosselklappe ist nicht kalibriert. Bitte Drosselklappe kalibrieren\")\n\
-		document.getElementById(\"flap\").innerHTML = \"nicht kalibriert\"\n\
-	}\n\
-	else\n\
-	{\n\
-		document.getElementById(\"flap\").innerHTML = values.flap + \"%\"\n\
-		document.getElementById(\"calibrateBtn\").hidden = true\n\
-	}\n\
 \n\
+	document.getElementById(\"flap\").innerHTML = values.flap + \"%\"\n\
 	document.getElementById(\"slider\").value = values.flap\n\
 	document.getElementById(\"temp\").innerHTML = values.temp + \"°C\"\n\
 	document.getElementById(\"state\").innerHTML = values.state\n\
@@ -211,45 +181,6 @@ body {\n\
 	values.duration = \"\"\n\
 	values.program = \"\"\n\
 \n\
-	if(\"progress\" == values.calibrated)\n\
-	{\n\
-\n\
-		var elem = document.getElementById(\"CalibrationBar\");\n\
-		document.getElementById(\"flap\").innerHTML = \"wird kalibriert\"\n\
-		document.getElementById(\"flapColumn\").classList.remove(\"auto-style2\")\n\
-		document.getElementById(\"flapColumn\").classList.add(\"auto-style3\")\n\
-		var width = 1;\n\
-		var id = setInterval(frame, 1400);\n\
-		function frame()\n\
-		{\n\
-			if (width >= 100)\n\
-			{\n\
-				clearInterval(id);\n\
-				location.reload()\n\
-			}\n\
-			else\n\
-			{\n\
-				width++;\n\
-				elem.style.width = width + \"%\";\n\
-			}\n\
-		}\n\
-  	}\n\
-	else\n\
-	{\n\
-		document.getElementById(\"CalibrationProgress\").hidden = true\n\
-	}\n\
-\n\
-	function calibrate()\n\
-	{\n\
-		if (confirm(\"Das kalibrieren der Drosselklappe dauert ca. 2-3 Minuten\"))\n\
-		{\n\
-			document.getElementById(\"flap\").innerHTML = \"übernehmen um zu kalibrieren\"\n\
-			document.getElementById(\"flapColumn\").classList.remove(\"auto-style2\")\n\
-			document.getElementById(\"flapColumn\").classList.add(\"auto-style3\")\n\
-			values.calibrated = \"do\"\n\
-			document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
-		}\n\
-	}\n\
 	function power()\n\
 	{\n\
 	 	var anHttpRequest = new XMLHttpRequest();\n\
@@ -308,11 +239,11 @@ void base::Submit_Callback(void)
 	else
 	{
 		this->state = obj["state"].as < String > ();
+		this->flap = obj["flap"].as < String > ();
 		this->duration = obj["duration"].as < String > ();
+		this->calibrated = obj["calibrated"].as < String > ();
 		this->program = obj["program"].as < String > ();
 		this->temp = obj["temp"].as < String > ();
-		this->flap = obj["flap"].as < String > ();
-		this->calibrated = obj["calibrated"].as < String > ();
 
 	}
 	if (NULL != this->submit_UserCallback)
@@ -336,6 +267,16 @@ String base::Get_state ( void )
 {
 	return this->state;
 }
+void base::Set_flap (String value)
+{
+	this->flap = value;
+	this->Replace("flap", this->flap);
+}
+
+String base::Get_flap ( void )
+{
+	return this->flap;
+}
 void base::Set_duration (String value)
 {
 	this->duration = value;
@@ -345,6 +286,16 @@ void base::Set_duration (String value)
 String base::Get_duration ( void )
 {
 	return this->duration;
+}
+void base::Set_calibrated (String value)
+{
+	this->calibrated = value;
+	this->Replace("calibrated", this->calibrated);
+}
+
+String base::Get_calibrated ( void )
+{
+	return this->calibrated;
 }
 void base::Set_program (String value)
 {
@@ -366,26 +317,6 @@ String base::Get_temp ( void )
 {
 	return this->temp;
 }
-void base::Set_flap (String value)
-{
-	this->flap = value;
-	this->Replace("flap", this->flap);
-}
-
-String base::Get_flap ( void )
-{
-	return this->flap;
-}
-void base::Set_calibrated (String value)
-{
-	this->calibrated = value;
-	this->Replace("calibrated", this->calibrated);
-}
-
-String base::Get_calibrated ( void )
-{
-	return this->calibrated;
-}
 void base::Render( void )
 {
 	this->server->send( 200, base_text );
@@ -404,7 +335,7 @@ void base::Replace(String var, String val)
 	var.toCharArray(varName, varLength);
 	val.toCharArray(value, valLength);
 #ifdef DEBUG
-	 Serial.println("Search for calibrated");
+	 Serial.println("Search for " + var + ");
 #endif
 	for (int i=0; i < sizeof(base_text); i++)
 	{

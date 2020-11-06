@@ -10,16 +10,16 @@ class base
 		void SetCallback_submit (void (*callback)(void));
 		void Set_state (String value);
 		String Get_state ();
+		void Set_flap (String value);
+		String Get_flap ();
 		void Set_duration (String value);
 		String Get_duration ();
+		void Set_calibrated (String value);
+		String Get_calibrated ();
 		void Set_program (String value);
 		String Get_program ();
 		void Set_temp (String value);
 		String Get_temp ();
-		void Set_flap (String value);
-		String Get_flap ();
-		void Set_calibrated (String value);
-		String Get_calibrated ();
 	private:
 		void Submit_Callback(void);
 		int  ReplaceJSVariable(int index, const char * varName, const char * value, int valLength);
@@ -28,9 +28,9 @@ class base
 		ESP8266WebServer* server;
 
 		String state;
+		String flap;
 		String duration;
+		String calibrated;
 		String program;
 		String temp;
-		String flap;
-		String calibrated;
 };

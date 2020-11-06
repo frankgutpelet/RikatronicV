@@ -9,7 +9,7 @@ const char* ssid = "WMOSKITO";
 const char* password = ".ubX54bVSt#vxW11m.";
 
 ESP8266WebServer server(80);
-Flap flap(3,0,0,1);
+Flap flap(5,3,0,1);
 
 base indexPage(&server);
 

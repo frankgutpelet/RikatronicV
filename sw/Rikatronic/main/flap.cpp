@@ -1,6 +1,6 @@
 #include "flap.hpp"
 #include <Arduino.h>
-#define PWM_FACTOR ((double)255 * 10) / (100 * 24))
+#define PWM_FACTOR ((double)1023 * 10) / (100 * 24))
 #define TIMER_INTERVAL_MS        1000
 #define TMP_CURVE_OFFSET 1525
 #define TMP_CURVE_PITCH 1500
@@ -46,6 +46,7 @@ void Flap::SwitchOff()
 
 int Flap::GetPosition()
 {
+  Serial.println(String("Flap value: ") + String(analogRead(adcPin)));
   if(!this->isCalibrated)
   {
     return ERROR_NOT_CALIBRATED;
@@ -55,6 +56,7 @@ int Flap::GetPosition()
   {
     return ERROR_WRONG_CALIBRATED;
   }
+  
   return (int)((double)analogRead(adcPin) - this->calibrationFactorLow) * 100 / (this->calibrationFactorHigh - this->calibrationFactorLow);
 }
 bool Flap::IsCalibrated()
@@ -77,10 +79,13 @@ int Flap::GetTemp()
 double Flap::GetTmpResistance()
 {
   double voltage = this->GetTmpVoltage();
+  Serial.println(String("Voltage: ") + String(voltage));
+  Serial.println(String("Resistancee: ") + String((voltage * 100)/(3,3 - voltage)));
   return (voltage * 100)/(3,3 - voltage);
 }
 double Flap::GetTmpVoltage()
 {
+  Serial.println(String("Temp value: ") + String(analogRead(this->adcTmpPin)));
   return 3,3 * analogRead(this->adcTmpPin) / 1023;
 }
 void Flap::SetMode(flapMode_e state)
@@ -100,6 +105,7 @@ void Flap::ProgramStateMachine()
   {
     case Flap::FLAP_PROGRAM_STATE_CALIBRATION_LOW: /* after 10sec  */
       this->calibrationFactorLow = analogRead(this->adcPin);
+      Serial.println(String("Calibration Low value: ") + String(this->calibrationFactorLow)); 
       this->SwitchOn(); 
       this->SetPosition(100);
       this->action_timeSec = 120;
@@ -107,6 +113,7 @@ void Flap::ProgramStateMachine()
       return;
     case Flap::FLAP_PROGRAM_STATE_CALIBRATION_HIGH: /* after 2 min  */
       this->calibrationFactorHigh = analogRead(this->adcPin);
+      Serial.println(String("Calibration High value: ") + String(this->calibrationFactorHigh)); 
       this->isCalibrated = true;
       this->programState = Flap::FLAP_PROGRAM_STATE_NONE;
       return;

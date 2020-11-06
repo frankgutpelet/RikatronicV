@@ -170,7 +170,7 @@ body {\n\
 <form action=\"submit\" method=\"get\" >\n\
 	<button class=\"button\" id=\"submitBtn\" type=\"submit\" name=\"action\" value=\"{{ json }}\" >übernehmen</button>\n\
 </form>\n\
-<p class=\"buttonsmall\" type=\"submit\" onclick=\"calibrate()()\">Kalibrieren</p>\n\
+<p id=\"calibrateBtn\" class=\"buttonsmall\" type=\"submit\" onclick=\"calibrate()()\">Kalibrieren</p>\n\
 <div id=\"CalibrationProgress\">\n\
   <div id=\"CalibrationBar\"></div>\n\
 </div>\n\
@@ -196,6 +196,7 @@ body {\n\
 	else\n\
 	{\n\
 		document.getElementById(\"flap\").innerHTML = values.flap + \"%\"\n\
+		document.getElementById(\"calibrateBtn\").hidden = true\n\
 	}\n\
 \n\
 	document.getElementById(\"slider\").value = values.flap\n\
@@ -204,6 +205,11 @@ body {\n\
 	document.getElementById(\"duration\").innerHTML = values.duration\n\
 	document.getElementById(\"program\").innerHTML = values.program\n\
 	document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
+	values.flap = \"\"\n\
+	values.temp = \"\"\n\
+	values.state = \"\"\n\
+	values.duration = \"\"\n\
+	values.program = \"\"\n\
 \n\
 	if(\"progress\" == values.calibrated)\n\
 	{\n\
@@ -219,6 +225,7 @@ body {\n\
 			if (width >= 100)\n\
 			{\n\
 				clearInterval(id);\n\
+				location.reload()\n\
 			}\n\
 			else\n\
 			{\n\
@@ -226,12 +233,6 @@ body {\n\
 				elem.style.width = width + \"%\";\n\
 			}\n\
 		}\n\
-		setTimeout(function()\n\
-		{\n\
-  			location.reload()\n\
-		}, 140000);\n\
-\n\
-\n\
   	}\n\
 	else\n\
 	{\n\
@@ -309,8 +310,8 @@ void base::Submit_Callback(void)
 		this->state = obj["state"].as < String > ();
 		this->duration = obj["duration"].as < String > ();
 		this->program = obj["program"].as < String > ();
-		this->flap = obj["flap"].as < String > ();
 		this->temp = obj["temp"].as < String > ();
+		this->flap = obj["flap"].as < String > ();
 		this->calibrated = obj["calibrated"].as < String > ();
 
 	}
@@ -328,6 +329,7 @@ void base::SetCallback_submit (void (*callback)(void))
 void base::Set_state (String value)
 {
 	this->state = value;
+	this->Replace("state", this->state);
 }
 
 String base::Get_state ( void )
@@ -337,6 +339,7 @@ String base::Get_state ( void )
 void base::Set_duration (String value)
 {
 	this->duration = value;
+	this->Replace("duration", this->duration);
 }
 
 String base::Get_duration ( void )
@@ -346,33 +349,37 @@ String base::Get_duration ( void )
 void base::Set_program (String value)
 {
 	this->program = value;
+	this->Replace("program", this->program);
 }
 
 String base::Get_program ( void )
 {
 	return this->program;
 }
-void base::Set_flap (String value)
-{
-	this->flap = value;
-}
-
-String base::Get_flap ( void )
-{
-	return this->flap;
-}
 void base::Set_temp (String value)
 {
 	this->temp = value;
+	this->Replace("temp", this->temp);
 }
 
 String base::Get_temp ( void )
 {
 	return this->temp;
 }
+void base::Set_flap (String value)
+{
+	this->flap = value;
+	this->Replace("flap", this->flap);
+}
+
+String base::Get_flap ( void )
+{
+	return this->flap;
+}
 void base::Set_calibrated (String value)
 {
 	this->calibrated = value;
+	this->Replace("calibrated", this->calibrated);
 }
 
 String base::Get_calibrated ( void )
@@ -381,12 +388,6 @@ String base::Get_calibrated ( void )
 }
 void base::Render( void )
 {
-		this->Replace("state", this->state);
-		this->Replace("duration", this->duration);
-		this->Replace("program", this->program);
-		this->Replace("flap", this->flap);
-		this->Replace("temp", this->temp);
-		this->Replace("calibrated", this->calibrated);
 	this->server->send( 200, base_text );
 }
 void base::Replace(String var, String val)
@@ -396,6 +397,10 @@ void base::Replace(String var, String val)
 	char varName[varLength];
 	char value[valLength];
 	char tmpVarName[varLength];
+	if (10 < valLength)
+	{
+		valLength = 10;
+	}
 	var.toCharArray(varName, varLength);
 	val.toCharArray(value, valLength);
 #ifdef DEBUG

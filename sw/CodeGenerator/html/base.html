@@ -166,7 +166,7 @@ body {
 <form action="submit" method="get" >
 	<button class="button" id="submitBtn" type="submit" name="action" value="{{ json }}" >übernehmen</button>
 </form>
-<p class="buttonsmall" type="submit" onclick="calibrate()()">Kalibrieren</p>
+<p id="calibrateBtn" class="buttonsmall" type="submit" onclick="calibrate()()">Kalibrieren</p>
 <div id="CalibrationProgress">
   <div id="CalibrationBar"></div>
 </div>
@@ -192,6 +192,7 @@ body {
 	else
 	{
 		document.getElementById("flap").innerHTML = values.flap + "%"
+		document.getElementById("calibrateBtn").hidden = true
 	}
 
 	document.getElementById("slider").value = values.flap
@@ -200,6 +201,11 @@ body {
 	document.getElementById("duration").innerHTML = values.duration
 	document.getElementById("program").innerHTML = values.program
 	document.getElementById("submitBtn").value = JSON.stringify(values)
+	values.flap = ""
+	values.temp = ""
+	values.state = ""
+	values.duration = ""
+	values.program = ""
 
 	if("progress" == values.calibrated)
 	{
@@ -215,6 +221,7 @@ body {
 			if (width >= 100)
 			{
 				clearInterval(id);
+				location.reload()
 			}
 			else
 			{
@@ -222,12 +229,6 @@ body {
 				elem.style.width = width + "%";
 			}
 		}
-		setTimeout(function()
-		{
-  			location.reload()
-		}, 140000);
-
-
   	}
 	else
 	{

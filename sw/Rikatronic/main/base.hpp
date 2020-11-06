@@ -14,10 +14,10 @@ class base
 		String Get_duration ();
 		void Set_program (String value);
 		String Get_program ();
-		void Set_flap (String value);
-		String Get_flap ();
 		void Set_temp (String value);
 		String Get_temp ();
+		void Set_flap (String value);
+		String Get_flap ();
 		void Set_calibrated (String value);
 		String Get_calibrated ();
 	private:
@@ -30,7 +30,7 @@ class base
 		String state;
 		String duration;
 		String program;
-		String flap;
 		String temp;
+		String flap;
 		String calibrated;
 };

@@ -9,24 +9,48 @@ const char* ssid = "WMOSKITO";
 const char* password = ".ubX54bVSt#vxW11m.";
 
 ESP8266WebServer server(80);
-Flap flap(3,0,0);
+Flap flap(3,0,0,1);
 
 base indexPage(&server);
 
-void handleRoot() {
+void handleRoot() 
+{
+   /* run calibration  */
+  if ((Flap::FLAP_PROGRAM_STATE_CALIBRATION_LOW == flap.GetState())||(Flap::FLAP_PROGRAM_STATE_CALIBRATION_HIGH == flap.GetState()))
+  {
+    Serial.println("calibration Running");
+    indexPage.Set_calibrated("progress"); 
+  }
+  else if (String("do") == indexPage.Get_calibrated())
+  {
+    Serial.println("do");
+    indexPage.Set_calibrated("progress"); 
+    flap.Calibrate();   
+  }
+  if(String("MANUAL") == indexPage.Get_state())
+  {
+    flap.SetMode(Flap::FLAP_MODE_MANUAL);
+    String flapstate = indexPage.Get_flap();
+    Serial.println(String("set manual flap to ") + flapstate + ("%"));
+    if(String("") != flapstate)
+    {
+      flap.SetPosition(flapstate.toInt());
+    }
+  }
+
+  if (flap.IsCalibrated())
+  {
+    Serial.println("calibrated");
+    indexPage.Set_calibrated("true");
+    indexPage.Set_flap(String(flap.GetPosition()));
+  }
+  indexPage.Set_temp(String(flap.GetTemp()));
   indexPage.Render();
 }
 
 void callback() 
-{
-  if (String("do") == indexPage.Get_calibrated())
-  {
-    
-    indexPage.Set_calibrated("progress");
-    indexPage.Render();
-    /*TODO kalibrierung durchführen */
-  }
-  //handleRoot();
+{ 
+  handleRoot();
 }
 
 void handleNotFound() {

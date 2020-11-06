@@ -64,11 +64,9 @@ def printClass(side):
     for variable in side.vars:
         header.write("\t\tvoid Set_" + variable + " (String value);\n")
         header.write("\t\tString Get_" + variable + " ();\n")
-        source.write("void " + side.name + "::Set_" + variable + " (String value)\n{\n\tthis->" + variable + " = value;\n}\n\n")
+        source.write("void " + side.name + "::Set_" + variable + " (String value)\n{\n\tthis->" + variable + " = value;\n\tthis->Replace(\"" + variable + "\", this->" + variable + ");\n}\n\n")
         source.write("String base::Get_" + variable + " ( void )\n{\n\treturn this->" + variable + ";\n}\n")
     source.write("void " + side.name + "::Render( void )\n{\n")
-    for var in side.vars:
-        source.write("\t\tthis->Replace(\"" + var + "\", this->" + var + ");\n")
     source.write("\tthis->server->send( 200, " + side.name + "_text );\n")
     source.write("}\n")
 
@@ -79,6 +77,7 @@ def printClass(side):
     source.write("\tchar varName[varLength];\n")
     source.write("\tchar value[valLength];\n")
     source.write("\tchar tmpVarName[varLength];\n")
+    source.write("\tif (10 < valLength)\n\t{\n\t\tvalLength = 10;\n\t}\n")
     source.write("\tvar.toCharArray(varName, varLength);\n")
     source.write("\tval.toCharArray(value, valLength);\n")
 

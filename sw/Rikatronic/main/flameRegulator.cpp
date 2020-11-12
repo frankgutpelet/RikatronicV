@@ -35,8 +35,8 @@ FlameRegulator::programStateConfig_t FlameRegulator::programStateConfig[FLAP_PRO
     {FLAP_PROGRAM_STATE_HEAT_UP_1,      FLAP_PROGRAM_STATE_HEAT_UP_2,       FLAP_PROGRAM_STATE_HEAT_UP_START,  50,                     35,                 40,                 60 },
     {FLAP_PROGRAM_STATE_HEAT_UP_2,      FLAP_PROGRAM_STATE_HEAT_UP_3,       FLAP_PROGRAM_STATE_HEAT_UP_1,      60,                     45,                 60,                 60 },
     {FLAP_PROGRAM_STATE_HEAT_UP_3,      FLAP_PROGRAM_STATE_HEAT_UP_4,       FLAP_PROGRAM_STATE_HEAT_UP_2,      70,                     55,                 70,                 60 },
-    {FLAP_PROGRAM_STATE_HEAT_UP_4,      FLAP_PROGRAM_STATE_HEAT_UP_END,     FLAP_PROGRAM_STATE_HEAT_UP_3,      80,                     65,                 75,                 60 },
-    {FLAP_PROGRAM_STATE_HEAT_UP_END,    FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_UP_3,      90,                     75,                 80,                 60 },
+    {FLAP_PROGRAM_STATE_HEAT_UP_4,      FLAP_PROGRAM_STATE_HEAT_UP_END,     FLAP_PROGRAM_STATE_HEAT_UP_3,      80,                     65,                 75,                120 },
+    {FLAP_PROGRAM_STATE_HEAT_UP_END,    FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_UP_3,      90,                     75,                 80,                120 },
     {FLAP_PROGRAM_STATE_HEAT_BURN,      FLAP_PROGRAM_STATE_HEAT_RESCUE,     FLAP_PROGRAM_STATE_HEAT_BURN,    1000,                     50,                 85,                 30 },
     {FLAP_PROGRAM_STATE_HEAT_OFF,       FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,       30,                      0,                  0,                 10 },
     {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,       40,                     25,                  0,                120 }
@@ -116,13 +116,14 @@ void FlameRegulator::SetManual(int pos)
 void FlameRegulator::ProgramStateMachine (void)
 {
     programStateConfig_t* currentConfig = &this->programStateConfig[(int)this->programState];
-
-    this->logger->Debug("start Statemachine, mode: " + this->GetFlapRegulationMode());
+    
     if (0 != this->action_timeSec)
     {
         this->action_timeSec--;
         return;
     }
+
+    this->logger->Debug(String("Statemachine: ") + this->GetProgramStateStr());
 
     // do nothin if manual regulation
     if (FLAP_MODE_MANUAL == this->flapRegulationMode)

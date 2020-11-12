@@ -56,6 +56,7 @@ tempSensor{TempSensor(ANALOG_INPUT)}
     this->programState = FLAP_PROGRAM_STATE_HEAT_OFF;
     this->flapRegulationMode = FLAP_MODE_ECO;
     this->logger = Logger::instance();
+    this->RecogniceInitialState();
 
 	// initialize tinmer
 	os_timer_setfn(&(this->timer), timerCallback, this);

@@ -3,32 +3,47 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include "base.hpp"
-#include "flap.hpp"
+#include "flameRegulator.hpp"
 
-const char* ssid = "WMOSKITO";
+const char* ssid = "SHMOSKITO";
 const char* password = ".ubX54bVSt#vxW11m.";
+const char* myhostname = "RikatronicV";
 
 ESP8266WebServer server(80);
-Flap flap(5,3,0);
-
+FlameRegulator flameRegulator;
 base indexPage(&server);
 
 void handleRoot() 
 {
-
   if(String("MANUAL") == indexPage.Get_state())
   {
-    flap.SetMode(Flap::FLAP_MODE_MANUAL);
+    flameRegulator.SetFlapRegulationMode(FlameRegulator::FLAP_MODE_MANUAL);
+    indexPage.Set_state("MANUAL");
     String flapstate = indexPage.Get_flap();
-    Serial.println(String("set manual flap to ") + flapstate + ("%"));
     if(String("") != flapstate)
     {
-      flap.SetPosition(flapstate.toInt());
+        flameRegulator.SetManual(flapstate.toInt());
     }
   }
- 
-  indexPage.Set_flap(String(flap.GetPosition()));
-  indexPage.Set_temp(String(flap.GetTemp()));
+  else if (String("ECO")== indexPage.Get_state())
+  {
+      flameRegulator.SetFlapRegulationMode(FlameRegulator::FLAP_MODE_ECO);
+      indexPage.Set_state("ECO");
+  }
+  else if (String("POWER")== indexPage.Get_state())
+  {
+      flameRegulator.SetFlapRegulationMode(FlameRegulator::FLAP_MODE_POWER);
+      indexPage.Set_state("POWER");
+  }
+  if (String("REFILL")== indexPage.Get_program())
+  {
+    Serial.println("refill");
+    flameRegulator.Refill();
+  }
+
+  indexPage.Set_program(flameRegulator.GetProgramStateStr());
+  indexPage.Set_flap(String(flameRegulator.GetFlapPosition()));
+  indexPage.Set_temp(String(flameRegulator.GetTemperature()));
   indexPage.Render();
 }
 
@@ -63,7 +78,7 @@ void setup(void) {
   
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
-  WiFi.hostname("RikatronicV");
+  WiFi.hostname(myhostname);
   WiFi.begin(ssid, password);
   Serial.println("");
 

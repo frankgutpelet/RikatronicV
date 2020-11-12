@@ -139,6 +139,11 @@ body {\n\
 				<p class=\"button\" type=\"submit\" onclick=\"eco()\">ECO</p>\n\
 			</form>\n\
 		</td>\n\
+		<td>\n\
+			<p>\n\
+				<p class=\"button\" type=\"submit\" onclick=\"refill()\">nachlegen</p>\n\
+			</form>\n\
+		</td>\n\
 	</tr>\n\
 </table>\n\
 </p>\n\
@@ -166,8 +171,7 @@ body {\n\
 		\"program\" : \"0\",            \n\
 		\"duration\" : \"0\",           \n\
 		\"calibrated\" : \"0\"}         \n\
-\n\
-\n\
+		\n\
 	document.getElementById(\"flap\").innerHTML = values.flap + \"%\"\n\
 	document.getElementById(\"slider\").value = values.flap\n\
 	document.getElementById(\"temp\").innerHTML = values.temp + \"°C\"\n\
@@ -175,20 +179,18 @@ body {\n\
 	document.getElementById(\"duration\").innerHTML = values.duration\n\
 	document.getElementById(\"program\").innerHTML = values.program\n\
 	document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
-	values.flap = \"\"\n\
-	values.temp = \"\"\n\
-	values.state = \"\"\n\
-	values.duration = \"\"\n\
-	values.program = \"\"\n\
 \n\
+	function refill()\n\
+	{\n\
+		values.program = \"REFILL\"\n\
+		document.getElementById(\"state\").innerHTML = values.state\n\
+		document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
+	}\n\
 	function power()\n\
 	{\n\
-	 	var anHttpRequest = new XMLHttpRequest();\n\
 		values.state = \"POWER\"\n\
 		document.getElementById(\"state\").innerHTML = values.state\n\
 		document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
-		anHttpRequest.open( \"GET\", \"Rikatronic/power\", true );\n\
-		anHttpRequest.send( null );\n\
 	}\n\
 	function eco()\n\
 	{\n\
@@ -207,7 +209,7 @@ body {\n\
 		if (\"MANUAL\" == values.state)\n\
 		{\n\
 			values.flap = document.getElementById(\"slider\").value\n\
-			document.getElementById(\"flap\").innerHTML = values.flap\n\
+			document.getElementById(\"flap\").innerHTML = values.flap + \"% (übernehmen)\"\n\
 			document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
 		}\n\
 		else\n\
@@ -238,12 +240,12 @@ void base::Submit_Callback(void)
 	}
 	else
 	{
+		this->program = obj["program"].as < String > ();
+		this->duration = obj["duration"].as < String > ();
+		this->temp = obj["temp"].as < String > ();
+		this->calibrated = obj["calibrated"].as < String > ();
 		this->state = obj["state"].as < String > ();
 		this->flap = obj["flap"].as < String > ();
-		this->duration = obj["duration"].as < String > ();
-		this->calibrated = obj["calibrated"].as < String > ();
-		this->program = obj["program"].as < String > ();
-		this->temp = obj["temp"].as < String > ();
 
 	}
 	if (NULL != this->submit_UserCallback)
@@ -257,6 +259,46 @@ void base::SetCallback_submit (void (*callback)(void))
 	this->submit_UserCallback = callback;
 }
 
+void base::Set_program (String value)
+{
+	this->program = value;
+	this->Replace("program", this->program);
+}
+
+String base::Get_program ( void )
+{
+	return this->program;
+}
+void base::Set_duration (String value)
+{
+	this->duration = value;
+	this->Replace("duration", this->duration);
+}
+
+String base::Get_duration ( void )
+{
+	return this->duration;
+}
+void base::Set_temp (String value)
+{
+	this->temp = value;
+	this->Replace("temp", this->temp);
+}
+
+String base::Get_temp ( void )
+{
+	return this->temp;
+}
+void base::Set_calibrated (String value)
+{
+	this->calibrated = value;
+	this->Replace("calibrated", this->calibrated);
+}
+
+String base::Get_calibrated ( void )
+{
+	return this->calibrated;
+}
 void base::Set_state (String value)
 {
 	this->state = value;
@@ -276,46 +318,6 @@ void base::Set_flap (String value)
 String base::Get_flap ( void )
 {
 	return this->flap;
-}
-void base::Set_duration (String value)
-{
-	this->duration = value;
-	this->Replace("duration", this->duration);
-}
-
-String base::Get_duration ( void )
-{
-	return this->duration;
-}
-void base::Set_calibrated (String value)
-{
-	this->calibrated = value;
-	this->Replace("calibrated", this->calibrated);
-}
-
-String base::Get_calibrated ( void )
-{
-	return this->calibrated;
-}
-void base::Set_program (String value)
-{
-	this->program = value;
-	this->Replace("program", this->program);
-}
-
-String base::Get_program ( void )
-{
-	return this->program;
-}
-void base::Set_temp (String value)
-{
-	this->temp = value;
-	this->Replace("temp", this->temp);
-}
-
-String base::Get_temp ( void )
-{
-	return this->temp;
 }
 void base::Render( void )
 {

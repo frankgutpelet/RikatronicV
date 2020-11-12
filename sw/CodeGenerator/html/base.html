@@ -135,6 +135,11 @@ body {
 				<p class="button" type="submit" onclick="eco()">ECO</p>
 			</form>
 		</td>
+		<td>
+			<p>
+				<p class="button" type="submit" onclick="refill()">nachlegen</p>
+			</form>
+		</td>
 	</tr>
 </table>
 </p>
@@ -162,8 +167,7 @@ body {
 		"program" : "0",
 		"duration" : "0",
 		"calibrated" : "0"}
-
-
+		
 	document.getElementById("flap").innerHTML = values.flap + "%"
 	document.getElementById("slider").value = values.flap
 	document.getElementById("temp").innerHTML = values.temp + "°C"
@@ -171,20 +175,18 @@ body {
 	document.getElementById("duration").innerHTML = values.duration
 	document.getElementById("program").innerHTML = values.program
 	document.getElementById("submitBtn").value = JSON.stringify(values)
-	values.flap = ""
-	values.temp = ""
-	values.state = ""
-	values.duration = ""
-	values.program = ""
 
+	function refill()
+	{
+		values.program = "REFILL"
+		document.getElementById("state").innerHTML = values.state
+		document.getElementById("submitBtn").value = JSON.stringify(values)
+	}
 	function power()
 	{
-	 	var anHttpRequest = new XMLHttpRequest();
 		values.state = "POWER"
 		document.getElementById("state").innerHTML = values.state
 		document.getElementById("submitBtn").value = JSON.stringify(values)
-		anHttpRequest.open( "GET", "Rikatronic/power", true );
-		anHttpRequest.send( null );
 	}
 	function eco()
 	{
@@ -203,7 +205,7 @@ body {
 		if ("MANUAL" == values.state)
 		{
 			values.flap = document.getElementById("slider").value
-			document.getElementById("flap").innerHTML = values.flap
+			document.getElementById("flap").innerHTML = values.flap + "% (übernehmen)"
 			document.getElementById("submitBtn").value = JSON.stringify(values)
 		}
 		else

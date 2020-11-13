@@ -70,7 +70,7 @@ void FlameRegulator::SetFlapRegulationMode(flapMode_e flapRegulationMode)
     {
       this->programStateConfig[FLAP_PROGRAM_STATE_HEAT_BURN].currentFlapPosition = 88;
     }
-     if (FLAP_MODE_ECO == flapRegulationMode)
+    if (FLAP_MODE_POWER == flapRegulationMode)
     {
       this->programStateConfig[FLAP_PROGRAM_STATE_HEAT_BURN].currentFlapPosition = 85;
     } 

@@ -18,7 +18,6 @@ void handleRoot()
   if(String("MANUAL") == indexPage.Get_state())
   {
     flameRegulator.SetFlapRegulationMode(FlameRegulator::FLAP_MODE_MANUAL);
-    indexPage.Set_state("MANUAL");
     String flapstate = indexPage.Get_flap();
     if(String("") != flapstate)
     {
@@ -28,19 +27,18 @@ void handleRoot()
   else if (String("ECO")== indexPage.Get_state())
   {
       flameRegulator.SetFlapRegulationMode(FlameRegulator::FLAP_MODE_ECO);
-      indexPage.Set_state("ECO");
   }
   else if (String("POWER")== indexPage.Get_state())
   {
       flameRegulator.SetFlapRegulationMode(FlameRegulator::FLAP_MODE_POWER);
-      indexPage.Set_state("POWER");
   }
   if (String("REFILL")== indexPage.Get_program())
   {
     Serial.println("refill");
     flameRegulator.Refill();
   }
-
+  
+  indexPage.Set_state(flameRegulator.GetFlapRegulationModeStr());
   indexPage.Set_program(flameRegulator.GetProgramStateStr());
   indexPage.Set_flap(String(flameRegulator.GetFlapPosition()));
   indexPage.Set_temp(String(flameRegulator.GetTemperature()));

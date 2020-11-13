@@ -28,14 +28,14 @@ double TempSensor::GetResistance(void)
 {
 	double voltage = this->GetVoltage();
 	double resistance = voltage * RESISTANCE_DEVIDER_R1 / (SYSTEM_VOLTAGE - voltage);
-	logger->Debug(String("Voltage: ") + String(voltage));
-	logger->Debug(String("Resistance: ") + String(resistance));
+	//logger->Debug(String("Voltage: ") + String(voltage));
+	//logger->Debug(String("Resistance: ") + String(resistance));
 	return resistance;
 }
 double TempSensor::GetVoltage(void)
 {
 	double tempValue = analogRead(this->analogInput);
-	logger->Debug(String("Temp value: ") + String(tempValue));
+	//logger->Debug(String("Temp value: ") + String(tempValue));
 	return (SYSTEM_VOLTAGE * tempValue / ADC_RESOLUTION_HIGHEST);
 }
 

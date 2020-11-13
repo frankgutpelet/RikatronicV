@@ -37,7 +37,7 @@ FlameRegulator::programStateConfig_t FlameRegulator::programStateConfig[FLAP_PRO
     {FLAP_PROGRAM_STATE_HEAT_UP_3,      FLAP_PROGRAM_STATE_HEAT_UP_4,       FLAP_PROGRAM_STATE_HEAT_UP_2,      70,                     55,                 70,                 60 },
     {FLAP_PROGRAM_STATE_HEAT_UP_4,      FLAP_PROGRAM_STATE_HEAT_UP_END,     FLAP_PROGRAM_STATE_HEAT_UP_3,      80,                     65,                 75,                120 },
     {FLAP_PROGRAM_STATE_HEAT_UP_END,    FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_UP_3,      90,                     75,                 80,                120 },
-    {FLAP_PROGRAM_STATE_HEAT_BURN,      FLAP_PROGRAM_STATE_HEAT_RESCUE,     FLAP_PROGRAM_STATE_HEAT_BURN,    1000,                     50,                 85,                 30 },
+    {FLAP_PROGRAM_STATE_HEAT_BURN,      FLAP_PROGRAM_STATE_HEAT_RESCUE,     FLAP_PROGRAM_STATE_HEAT_BURN,    1000,                     80,                 85,                 30 },
     {FLAP_PROGRAM_STATE_HEAT_OFF,       FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,       30,                      0,                  0,                 10 },
     {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,       40,                     25,                  0,                120 }
 };
@@ -54,7 +54,7 @@ flap{Flap(PWM_OUTPUT, RELAIS_OUTPUT)},
 tempSensor{TempSensor(ANALOG_INPUT)}
 {
     this->programState = FLAP_PROGRAM_STATE_HEAT_OFF;
-    this->flapRegulationMode = FLAP_MODE_ECO;
+    this->flapRegulationMode = FLAP_MODE_POWER;
     this->logger = Logger::instance();
     this->RecogniceInitialState();
 
@@ -66,6 +66,14 @@ tempSensor{TempSensor(ANALOG_INPUT)}
 void FlameRegulator::SetFlapRegulationMode(flapMode_e flapRegulationMode)
 {
     this->flapRegulationMode = flapRegulationMode;
+    if (FLAP_MODE_ECO == flapRegulationMode)
+    {
+      this->programStateConfig[FLAP_PROGRAM_STATE_HEAT_BURN].currentFlapPosition = 88;
+    }
+     if (FLAP_MODE_ECO == flapRegulationMode)
+    {
+      this->programStateConfig[FLAP_PROGRAM_STATE_HEAT_BURN].currentFlapPosition = 85;
+    } 
 }
 
 String FlameRegulator::GetFlapRegulationModeStr(void)

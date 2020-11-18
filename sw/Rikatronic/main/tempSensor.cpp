@@ -1,12 +1,12 @@
 ﻿#include <Arduino.h>
 #include "tempSensor.hpp"
 
-#define PT1000_0K_OFFSET (10000)
+#define PT1000_0K_OFFSET (1000)
 #define PT1000_CURVE_PITCH ((double) 0.28)
 #define RESISTANCE_DEVIDER_R1 (1000)
 #define SYSTEM_VOLTAGE ((double) 3.3)
 #define ADC_RESOLUTION_HIGHEST 1023
-#define TMP_OFFSET (0)
+#define TMP_OFFSET (-30)
 #define TMP_FACTOR (1)
 
 TempSensor::TempSensor(int analogInput)
@@ -19,22 +19,23 @@ int TempSensor::GetTemp(void)
 {
 	double resistance = this->GetResistance();
 	double temp = ((resistance - PT1000_0K_OFFSET) * PT1000_CURVE_PITCH);
+  temp = ((temp * TMP_FACTOR) + TMP_OFFSET);
 	logger->Debug(String("temperature: ") + String(temp));
-	return (int) ((temp * TMP_FACTOR) + TMP_OFFSET);
+	return (int) temp;
 }
 
 double TempSensor::GetResistance(void)
 {
 	double voltage = this->GetVoltage();
 	double resistance = voltage * RESISTANCE_DEVIDER_R1 / (SYSTEM_VOLTAGE - voltage);
-	logger->Debug(String("Voltage: ") + String(voltage));
-	logger->Debug(String("Resistance: ") + String(resistance));
+	//logger->Debug(String("Voltage: ") + String(voltage));
+	//logger->Debug(String("Resistance: ") + String(resistance));
 	return resistance;
 }
 double TempSensor::GetVoltage(void)
 {
 	double tempValue = analogRead(this->analogInput);
-	logger->Debug(String("Temp value: ") + String(tempValue));
+	//logger->Debug(String("Temp value: ") + String(tempValue));
 	return (SYSTEM_VOLTAGE * tempValue / ADC_RESOLUTION_HIGHEST);
 }
 

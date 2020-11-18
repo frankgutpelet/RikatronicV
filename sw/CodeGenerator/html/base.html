@@ -41,6 +41,23 @@ body {
   box-shadow: 0 5px #666;
   transform: translateY(4px);
 }
+.auto-style-headline {
+    text-transform: uppercase;
+    font-family: verdana;
+    font-size: 3em;
+    font-weight: 700;
+    color: #f5f5f5;
+    text-shadow: 1px 1px 1px #919191,
+        1px 1px 1px #919191,
+        1px 2px 1px #919191,
+        1px 3px 1px #919191,
+        1px 4px 1px #919191,
+        1px 5px 1px #919191,
+
+    1px 18px 6px rgba(16,16,16,0.4),
+    1px 22px 10px rgba(16,16,16,0.2),
+    1px 25px 35px rgba(16,16,16,0.2);
+}
 
 .auto-style1 {
 	font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
@@ -48,7 +65,24 @@ body {
 	color: #FFFFFF;
 }
 .auto-style2 {
-	color: #FFFFFF;
+    font-family: verdana;
+    font-size: 1em;
+    font-weight: 700;
+    color: #f5f5f5;
+    text-shadow: 1px 1px 1px #919191,
+    1px 5px 3px rgba(16,16,16,0.4),
+    1px 10px 5px rgba(16,16,16,0.2);
+}
+.auto-style-version {
+	text-align: right;
+	text-align: top;
+    font-family: verdana;
+    font-size: 0.6em;
+    font-weight: 700;
+    color: #f5f5f5;
+    text-shadow: 1px 1px 1px #919191,
+    1px 2px 1px rgba(16,16,16,0.4),
+    1px 4px 2px rgba(16,16,16,0.2);
 }
 .auto-style3 {
 	color: #FF0000;
@@ -72,7 +106,7 @@ body {
   appearance: none;
   width: 50px;
   height: 35px;
-  background: darkred;
+  background: darkblue;
   cursor: pointer;
 }
 #CalibrationProgress {
@@ -94,7 +128,8 @@ body {
 </style>
 </head>
 <body>
-<p class="auto-style1" align="center"><strong>Rikatronic V</strong></p>
+<p id="version" class="auto-style-version">Version: ?</p>
+<p class="auto-style-headline" align="center">Rikatronic V</p>
 <table class="auto-style3" style="width: 100%">
 	<tr>
 		<td class="auto-style2" style="width: 484px"><strong>Ofentemperatur</strong></td>
@@ -122,17 +157,17 @@ body {
 	<tr>
 		<td>
 			<form>
-				<p class="button" type="submit" onclick="power()">POWER</p>
+				<p class="button" type="submit" onclick="power()">Power</p>
 			</form>
 		</td>
 		<td>
 			<form >
-				<p class="button" type="submit" onclick="manual()">MANUAL</p>
+				<p class="button" type="submit" onclick="manual()">Manuel</p>
 			</form>
 		</td>
 		<td>
 			<p>
-				<p class="button" type="submit" onclick="eco()">ECO</p>
+				<p class="button" type="submit" onclick="eco()">eco</p>
 			</form>
 		</td>
 		<td>
@@ -155,6 +190,7 @@ body {
 	<button class="button" id="submitBtn" type="submit" name="action" value="{{ json }}" >übernehmen</button>
 </form>
 
+
 </body>
 
 </html>
@@ -166,7 +202,10 @@ body {
 		"temp" : "0",
 		"program" : "0",
 		"duration" : "0",
-		"calibrated" : "0"}
+		"calibrated" : "0",
+		"version" : "0"}
+
+	document.getElementById("version").innerHTML = "Version: " + values.version
 		
 	document.getElementById("flap").innerHTML = values.flap + "%"
 	document.getElementById("slider").value = values.flap

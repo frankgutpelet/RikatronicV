@@ -45,6 +45,23 @@ body {\n\
   box-shadow: 0 5px #666;\n\
   transform: translateY(4px);\n\
 }\n\
+.auto-style-headline {\n\
+    text-transform: uppercase;\n\
+    font-family: verdana;\n\
+    font-size: 3em;\n\
+    font-weight: 700;\n\
+    color: #f5f5f5;\n\
+    text-shadow: 1px 1px 1px #919191,\n\
+        1px 1px 1px #919191,\n\
+        1px 2px 1px #919191,\n\
+        1px 3px 1px #919191,\n\
+        1px 4px 1px #919191,\n\
+        1px 5px 1px #919191,\n\
+\n\
+    1px 18px 6px rgba(16,16,16,0.4),\n\
+    1px 22px 10px rgba(16,16,16,0.2),\n\
+    1px 25px 35px rgba(16,16,16,0.2);\n\
+}\n\
 \n\
 .auto-style1 {\n\
 	font-family: \"Gill Sans\", \"Gill Sans MT\", Calibri, \"Trebuchet MS\", sans-serif;\n\
@@ -52,7 +69,24 @@ body {\n\
 	color: #FFFFFF;\n\
 }\n\
 .auto-style2 {\n\
-	color: #FFFFFF;\n\
+    font-family: verdana;\n\
+    font-size: 1em;\n\
+    font-weight: 700;\n\
+    color: #f5f5f5;\n\
+    text-shadow: 1px 1px 1px #919191,\n\
+    1px 5px 3px rgba(16,16,16,0.4),\n\
+    1px 10px 5px rgba(16,16,16,0.2);\n\
+}\n\
+.auto-style-version {\n\
+	text-align: right;\n\
+	text-align: top;\n\
+    font-family: verdana;\n\
+    font-size: 0.6em;\n\
+    font-weight: 700;\n\
+    color: #f5f5f5;\n\
+    text-shadow: 1px 1px 1px #919191,\n\
+    1px 2px 1px rgba(16,16,16,0.4),\n\
+    1px 4px 2px rgba(16,16,16,0.2);\n\
 }\n\
 .auto-style3 {\n\
 	color: #FF0000;\n\
@@ -76,7 +110,7 @@ body {\n\
   appearance: none;\n\
   width: 50px;\n\
   height: 35px;\n\
-  background: darkred;\n\
+  background: darkblue;\n\
   cursor: pointer;\n\
 }\n\
 #CalibrationProgress {\n\
@@ -98,7 +132,8 @@ body {\n\
 </style>\n\
 </head>\n\
 <body>\n\
-<p class=\"auto-style1\" align=\"center\"><strong>Rikatronic V</strong></p>\n\
+<p id=\"version\" class=\"auto-style-version\">Version: ?</p>\n\
+<p class=\"auto-style-headline\" align=\"center\">Rikatronic V</p>\n\
 <table class=\"auto-style3\" style=\"width: 100%\">\n\
 	<tr>\n\
 		<td class=\"auto-style2\" style=\"width: 484px\"><strong>Ofentemperatur</strong></td>\n\
@@ -126,17 +161,17 @@ body {\n\
 	<tr>\n\
 		<td>\n\
 			<form>\n\
-				<p class=\"button\" type=\"submit\" onclick=\"power()\">POWER</p>\n\
+				<p class=\"button\" type=\"submit\" onclick=\"power()\">Power</p>\n\
 			</form>\n\
 		</td>\n\
 		<td>\n\
 			<form >\n\
-				<p class=\"button\" type=\"submit\" onclick=\"manual()\">MANUAL</p>\n\
+				<p class=\"button\" type=\"submit\" onclick=\"manual()\">Manuel</p>\n\
 			</form>\n\
 		</td>\n\
 		<td>\n\
 			<p>\n\
-				<p class=\"button\" type=\"submit\" onclick=\"eco()\">ECO</p>\n\
+				<p class=\"button\" type=\"submit\" onclick=\"eco()\">eco</p>\n\
 			</form>\n\
 		</td>\n\
 		<td>\n\
@@ -159,6 +194,7 @@ body {\n\
 	<button class=\"button\" id=\"submitBtn\" type=\"submit\" name=\"action\" value=\"{{ json }}\" >übernehmen</button>\n\
 </form>\n\
 \n\
+\n\
 </body>\n\
 \n\
 </html>\n\
@@ -170,7 +206,10 @@ body {\n\
 		\"temp\" : \"0\",               \n\
 		\"program\" : \"0\",            \n\
 		\"duration\" : \"0\",           \n\
-		\"calibrated\" : \"0\"}         \n\
+		\"calibrated\" : \"0\",         \n\
+		\"version\" : \"0\"}            \n\
+\n\
+	document.getElementById(\"version\").innerHTML = \"Version: \" + values.version\n\
 		\n\
 	document.getElementById(\"flap\").innerHTML = values.flap + \"%\"\n\
 	document.getElementById(\"slider\").value = values.flap\n\
@@ -240,12 +279,13 @@ void base::Submit_Callback(void)
 	}
 	else
 	{
-		this->program = obj["program"].as < String > ();
+		this->flap = obj["flap"].as < String > ();
 		this->duration = obj["duration"].as < String > ();
+		this->state = obj["state"].as < String > ();
+		this->version = obj["version"].as < String > ();
 		this->temp = obj["temp"].as < String > ();
 		this->calibrated = obj["calibrated"].as < String > ();
-		this->state = obj["state"].as < String > ();
-		this->flap = obj["flap"].as < String > ();
+		this->program = obj["program"].as < String > ();
 
 	}
 	if (NULL != this->submit_UserCallback)
@@ -259,15 +299,15 @@ void base::SetCallback_submit (void (*callback)(void))
 	this->submit_UserCallback = callback;
 }
 
-void base::Set_program (String value)
+void base::Set_flap (String value)
 {
-	this->program = value;
-	this->Replace("program", this->program);
+	this->flap = value;
+	this->Replace("flap", this->flap);
 }
 
-String base::Get_program ( void )
+String base::Get_flap ( void )
 {
-	return this->program;
+	return this->flap;
 }
 void base::Set_duration (String value)
 {
@@ -278,6 +318,26 @@ void base::Set_duration (String value)
 String base::Get_duration ( void )
 {
 	return this->duration;
+}
+void base::Set_state (String value)
+{
+	this->state = value;
+	this->Replace("state", this->state);
+}
+
+String base::Get_state ( void )
+{
+	return this->state;
+}
+void base::Set_version (String value)
+{
+	this->version = value;
+	this->Replace("version", this->version);
+}
+
+String base::Get_version ( void )
+{
+	return this->version;
 }
 void base::Set_temp (String value)
 {
@@ -299,25 +359,15 @@ String base::Get_calibrated ( void )
 {
 	return this->calibrated;
 }
-void base::Set_state (String value)
+void base::Set_program (String value)
 {
-	this->state = value;
-	this->Replace("state", this->state);
+	this->program = value;
+	this->Replace("program", this->program);
 }
 
-String base::Get_state ( void )
+String base::Get_program ( void )
 {
-	return this->state;
-}
-void base::Set_flap (String value)
-{
-	this->flap = value;
-	this->Replace("flap", this->flap);
-}
-
-String base::Get_flap ( void )
-{
-	return this->flap;
+	return this->program;
 }
 void base::Render( void )
 {

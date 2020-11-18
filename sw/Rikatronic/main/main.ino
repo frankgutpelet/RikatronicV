@@ -8,6 +8,7 @@
 const char* ssid = "SHMOSKITO";
 const char* password = ".ubX54bVSt#vxW11m.";
 const char* myhostname = "RikatronicV";
+const char* curVersion = "1.0.0";
 
 ESP8266WebServer server(80);
 FlameRegulator flameRegulator;
@@ -44,6 +45,7 @@ void handleRoot()
   indexPage.Set_program(flameRegulator.GetProgramStateStr());
   indexPage.Set_flap(String(flameRegulator.GetFlapPosition()));
   indexPage.Set_temp(String(flameRegulator.GetTemperature()));
+  indexPage.Set_version(curVersion);
   indexPage.Render();
 }
 

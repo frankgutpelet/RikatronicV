@@ -36,6 +36,20 @@ body {\n\
   border-radius: 10px;\n\
   box-shadow: 0 9px darkblue;\n\
 }\n\
+.button2 {\n\
+  display: inline-block;\n\
+  padding: 30px 45px;\n\
+  font-size: 35px;\n\
+  cursor: pointer;\n\
+  text-align: center;\n\
+  text-decoration: none;\n\
+  outline: none;\n\
+  color: #fff;\n\
+  background-color: silver;\n\
+  border: none;\n\
+  border-radius: 10px;\n\
+  box-shadow: 0 9px darkblue;\n\
+}\n\
 .button:hover {\n\
 	background-color: blueviolet\n\
 }\n\
@@ -161,17 +175,17 @@ body {\n\
 	<tr>\n\
 		<td>\n\
 			<form>\n\
-				<p class=\"button\" type=\"submit\" onclick=\"power()\">Power</p>\n\
+				<p class=\"button\" type=\"submit\" onclick=\"power()\">power</p>\n\
 			</form>\n\
 		</td>\n\
 		<td>\n\
 			<form >\n\
-				<p class=\"button\" type=\"submit\" onclick=\"manual()\">Manuel</p>\n\
+				<p class=\"button\" type=\"submit\" onclick=\"manual()\">manuell</p>\n\
 			</form>\n\
 		</td>\n\
 		<td>\n\
 			<p>\n\
-				<p class=\"button\" type=\"submit\" onclick=\"eco()\">eco</p>\n\
+				<p class=\"button\" type=\"submit\" onclick=\"eco()\">eco +</p>\n\
 			</form>\n\
 		</td>\n\
 		<td>\n\
@@ -190,9 +204,20 @@ body {\n\
 	</tr>\n\
 </table>\n\
 </p>\n\
-<form action=\"submit\" method=\"get\" >\n\
-	<button class=\"button\" id=\"submitBtn\" type=\"submit\" name=\"action\" value=\"{{ json }}\" >übernehmen</button>\n\
-</form>\n\
+<table style=\"width: 100%\">\n\
+	<tr>\n\
+		<td>\n\
+			<form action=\"submit\" method=\"post\" >\n\
+				<button class=\"button2\" id=\"submitBtn\" type=\"submit\" name=\"action\" value=\"\" >übernehmen</button>\n\
+			</form>\n\
+		</td>\n\
+		<td>\n\
+			<form action=\"submit\" method=\"get\" >\n\
+				<a href=\"http://rikatronicV\" class=\"button2\" >neu laden</a>\n\
+			</form>\n\
+		</td>\n\
+	</tr>\n\
+</table>\n\
 \n\
 \n\
 </body>\n\
@@ -279,13 +304,13 @@ void base::Submit_Callback(void)
 	}
 	else
 	{
-		this->flap = obj["flap"].as < String > ();
-		this->duration = obj["duration"].as < String > ();
 		this->state = obj["state"].as < String > ();
-		this->version = obj["version"].as < String > ();
-		this->temp = obj["temp"].as < String > ();
-		this->calibrated = obj["calibrated"].as < String > ();
+		this->duration = obj["duration"].as < String > ();
 		this->program = obj["program"].as < String > ();
+		this->version = obj["version"].as < String > ();
+		this->flap = obj["flap"].as < String > ();
+		this->calibrated = obj["calibrated"].as < String > ();
+		this->temp = obj["temp"].as < String > ();
 
 	}
 	if (NULL != this->submit_UserCallback)
@@ -299,15 +324,15 @@ void base::SetCallback_submit (void (*callback)(void))
 	this->submit_UserCallback = callback;
 }
 
-void base::Set_flap (String value)
+void base::Set_state (String value)
 {
-	this->flap = value;
-	this->Replace("flap", this->flap);
+	this->state = value;
+	this->Replace("state", this->state);
 }
 
-String base::Get_flap ( void )
+String base::Get_state ( void )
 {
-	return this->flap;
+	return this->state;
 }
 void base::Set_duration (String value)
 {
@@ -319,15 +344,15 @@ String base::Get_duration ( void )
 {
 	return this->duration;
 }
-void base::Set_state (String value)
+void base::Set_program (String value)
 {
-	this->state = value;
-	this->Replace("state", this->state);
+	this->program = value;
+	this->Replace("program", this->program);
 }
 
-String base::Get_state ( void )
+String base::Get_program ( void )
 {
-	return this->state;
+	return this->program;
 }
 void base::Set_version (String value)
 {
@@ -339,15 +364,15 @@ String base::Get_version ( void )
 {
 	return this->version;
 }
-void base::Set_temp (String value)
+void base::Set_flap (String value)
 {
-	this->temp = value;
-	this->Replace("temp", this->temp);
+	this->flap = value;
+	this->Replace("flap", this->flap);
 }
 
-String base::Get_temp ( void )
+String base::Get_flap ( void )
 {
-	return this->temp;
+	return this->flap;
 }
 void base::Set_calibrated (String value)
 {
@@ -359,15 +384,15 @@ String base::Get_calibrated ( void )
 {
 	return this->calibrated;
 }
-void base::Set_program (String value)
+void base::Set_temp (String value)
 {
-	this->program = value;
-	this->Replace("program", this->program);
+	this->temp = value;
+	this->Replace("temp", this->temp);
 }
 
-String base::Get_program ( void )
+String base::Get_temp ( void )
 {
-	return this->program;
+	return this->temp;
 }
 void base::Render( void )
 {

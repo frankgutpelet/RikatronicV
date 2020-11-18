@@ -140,7 +140,7 @@ def parseHtml(filename):
                 line += " "
             line += '\n'
 
-        match = re.search("form\s+action=\"([^\"]+)\"\s+method=\"get\"\s+", line)
+        match = re.search("form\s+action=\"([^\"]+)\"\s+method=\"post\"\s+", line)
         if (None != match):
             side.callbacks.append(match.groups()[0])
 

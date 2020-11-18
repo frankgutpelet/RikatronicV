@@ -32,6 +32,20 @@ body {
   border-radius: 10px;
   box-shadow: 0 9px darkblue;
 }
+.button2 {
+  display: inline-block;
+  padding: 30px 45px;
+  font-size: 35px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  color: #fff;
+  background-color: silver;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 9px darkblue;
+}
 .button:hover {
 	background-color: blueviolet
 }
@@ -157,17 +171,17 @@ body {
 	<tr>
 		<td>
 			<form>
-				<p class="button" type="submit" onclick="power()">Power</p>
+				<p class="button" type="submit" onclick="power()">power</p>
 			</form>
 		</td>
 		<td>
 			<form >
-				<p class="button" type="submit" onclick="manual()">Manuel</p>
+				<p class="button" type="submit" onclick="manual()">manuell</p>
 			</form>
 		</td>
 		<td>
 			<p>
-				<p class="button" type="submit" onclick="eco()">eco</p>
+				<p class="button" type="submit" onclick="eco()">eco +</p>
 			</form>
 		</td>
 		<td>
@@ -186,9 +200,20 @@ body {
 	</tr>
 </table>
 </p>
-<form action="submit" method="get" >
-	<button class="button" id="submitBtn" type="submit" name="action" value="{{ json }}" >übernehmen</button>
-</form>
+<table style="width: 100%">
+	<tr>
+		<td>
+			<form action="submit" method="post" >
+				<button class="button2" id="submitBtn" type="submit" name="action" value="" >übernehmen</button>
+			</form>
+		</td>
+		<td>
+			<form action="submit" method="get" >
+				<a href="http://rikatronicV" class="button2" >neu laden</a>
+			</form>
+		</td>
+	</tr>
+</table>
 
 
 </body>

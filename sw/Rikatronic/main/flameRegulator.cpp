@@ -188,7 +188,7 @@ void FlameRegulator::RecogniceInitialState(void)
 
     programStateConfig_t config = programStateConfig[FLAP_PROGRAM_STATE_HEAT_OFF];
     int temp = this->tempSensor.GetTemp();
-    this->logger->Debug("recognize initial state")
+    this->logger->Debug("recognize initial state");
 
     while (temp >= config.tempForNextState)
     {

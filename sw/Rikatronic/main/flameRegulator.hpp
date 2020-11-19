@@ -24,6 +24,7 @@ public:
 		FLAP_PROGRAM_STATE_HEAT_UP_3,
 		FLAP_PROGRAM_STATE_HEAT_UP_4,
 		FLAP_PROGRAM_STATE_HEAT_UP_END,
+		FLAP_PROGRAM_STATE_HEAT_BURN_IDLE,
 		FLAP_PROGRAM_STATE_HEAT_BURN,
 		FLAP_PROGRAM_STATE_HEAT_BURN_HOT,
 		FLAP_PROGRAM_STATE_HEAT_OFF,
@@ -67,7 +68,11 @@ private:
 		int tempForLastState;
 		int currentFlapPosition;
 		int breakTimeSec;
+		const char* message;
+		bool messageSent;
 	}programStateConfig_t;
+
+	void PushMessage(String message);
 
 	static programStateConfig_t programStateConfig[FLAP_PROGRAM_STATE_COUNT];
 

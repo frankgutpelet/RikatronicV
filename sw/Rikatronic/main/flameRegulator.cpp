@@ -1,8 +1,13 @@
 #include "flameRegulator.hpp"
+#include <WiFiClient.h>
 
 #define ANALOG_INPUT 0
 #define RELAIS_OUTPUT 16
 #define PWM_OUTPUT 5
+
+const char* S_PushMessage_DeviceId = "vCDFC7D7572A7731";
+const char* S_logServer = "api.pushingbox.com";
+
 
 const char* S_ProgramStateString[FlameRegulator::FLAP_PROGRAM_STATE_COUNT] =
 {
@@ -30,18 +35,19 @@ const char* S_FlapRegulationModeString[FlameRegulator::FLAP_MODE_Count]
 FlameRegulator::programStateConfig_t FlameRegulator::programStateConfig[FLAP_PROGRAM_STATE_COUNT]=
         //state                                 nextstate                       laststate               tempForNextState    tempForLastState    currentFlapPosition     breakTimeSec
 {
-    {FLAP_PROGRAM_STATE_NONE,           FLAP_PROGRAM_STATE_NONE,            FLAP_PROGRAM_STATE_NONE,            0,                      0,                  0,                  0 },
-    {FLAP_PROGRAM_STATE_REFILL,         FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     0,                      0,                  0,                  0 },
-    {FLAP_PROGRAM_STATE_HEAT_UP_START,  FLAP_PROGRAM_STATE_HEAT_UP_1,       FLAP_PROGRAM_STATE_HEAT_RESCUE,    40,                     30,                 20,                 60 },
-    {FLAP_PROGRAM_STATE_HEAT_UP_1,      FLAP_PROGRAM_STATE_HEAT_UP_2,       FLAP_PROGRAM_STATE_HEAT_RESCUE,    50,                     40,                 40,                 60 },
-    {FLAP_PROGRAM_STATE_HEAT_UP_2,      FLAP_PROGRAM_STATE_HEAT_UP_3,       FLAP_PROGRAM_STATE_HEAT_RESCUE,    60,                     50,                 60,                 60 },
-    {FLAP_PROGRAM_STATE_HEAT_UP_3,      FLAP_PROGRAM_STATE_HEAT_UP_4,       FLAP_PROGRAM_STATE_HEAT_RESCUE,    70,                     60,                 70,                 60 },
-    {FLAP_PROGRAM_STATE_HEAT_UP_4,      FLAP_PROGRAM_STATE_HEAT_UP_END,     FLAP_PROGRAM_STATE_HEAT_RESCUE,    80,                     70,                 75,                 60 },
-    {FLAP_PROGRAM_STATE_HEAT_UP_END,    FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,    90,                     80,                 80,                 60 },
-    {FLAP_PROGRAM_STATE_HEAT_BURN,      FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   FLAP_PROGRAM_STATE_HEAT_RESCUE,   140,                     60,                 85,                 30 },
-    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   FLAP_PROGRAM_STATE_HEAT_BURN,    1000,                    100,                 88,                 30 },
-    {FLAP_PROGRAM_STATE_HEAT_OFF,       FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,       30,                      0,                  0,                 10 },
-    {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,       40,                     25,                  0,                120 }
+    {FLAP_PROGRAM_STATE_NONE,           FLAP_PROGRAM_STATE_NONE,            FLAP_PROGRAM_STATE_NONE,            0,                      0,                  0,                  0,      "",                             false },
+    {FLAP_PROGRAM_STATE_REFILL,         FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     0,                      0,                  0,                  0,      "",                             false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_START,  FLAP_PROGRAM_STATE_HEAT_UP_1,       FLAP_PROGRAM_STATE_HEAT_RESCUE,    40,                     30,                 20,                 60,      "",                             false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_1,      FLAP_PROGRAM_STATE_HEAT_UP_2,       FLAP_PROGRAM_STATE_HEAT_RESCUE,    50,                     40,                 40,                 60,      "",                             false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_2,      FLAP_PROGRAM_STATE_HEAT_UP_3,       FLAP_PROGRAM_STATE_HEAT_RESCUE,    60,                     50,                 60,                 60,      "",                             false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_3,      FLAP_PROGRAM_STATE_HEAT_UP_4,       FLAP_PROGRAM_STATE_HEAT_RESCUE,    70,                     60,                 70,                 60,      "",                             false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_4,      FLAP_PROGRAM_STATE_HEAT_UP_END,     FLAP_PROGRAM_STATE_HEAT_RESCUE,    80,                     70,                 75,                 60,      "",                             false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_END,    FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,    90,                     80,                 80,                 60,      "",                             false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_IDLE, FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,   110,                     85,                 85,                 20,      "Bitte Holz nachlegen",         false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN,      FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   FLAP_PROGRAM_STATE_HEAT_BURN_IDLE,140,                     60,                100,                 30,      "",                             false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   FLAP_PROGRAM_STATE_HEAT_BURN,    1000,                    100,                 88,                 30,      "",                             false },
+    {FLAP_PROGRAM_STATE_HEAT_OFF,       FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,       30,                      0,                  0,                 10,      "",                             false },
+    {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,       40,                     25,                  0,                120,      "Ofen geht aus",                false }
 };
 
 
@@ -119,11 +125,24 @@ void FlameRegulator::ProgramStateMachine (void)
 {
     programStateConfig_t* currentConfig = &this->programStateConfig[(int)this->programState];
 
-    this->logger->Debug("start Statemachine, mode: " + this->GetFlapRegulationMode());
     if (0 != this->action_timeSec)
     {
         this->action_timeSec--;
         return;
+    }
+
+    if (("" != currentConfig->message) &! (currentConfig->messageSent))
+    {
+        this->PushMessage(currentConfig->message);
+        currentConfig->messageSent = true;
+    }
+
+    for (int i = 0; i < FLAP_PROGRAM_STATE_COUNT; i++)
+    {
+        if (i != (int)this->programState)
+        {
+            this->programStateConfig[i].messageSent = false;
+        }
     }
 
     // do nothin if manual regulation
@@ -177,6 +196,38 @@ void FlameRegulator::RecogniceInitialState(void)
     this->programState = config.state;
     this->action_timeSec = 0;
     this->logger->Debug(String("initial state is ") + this->GetProgramStateStr());
+}
+
+void FlameRegulator::PushMessage(String message)
+{
+    WiFiClient client;
+
+    Serial.println("- connecting to pushing server: " + String(S_logServer));
+    if (client.connect(S_logServer, 80)) 
+    {
+        Serial.println("- succesfully connected");
+
+        String postStr = "devid=";
+        postStr += String(S_PushMessage_DeviceId);
+        postStr += "&message_parameter=";
+        postStr += String(message);
+        postStr += "\r\n\r\n";
+
+        Serial.println("- sending data...");
+
+        client.print("POST /pushingbox HTTP/1.1\n");
+        client.print("Host: api.pushingbox.com\n");
+        client.print("Connection: close\n");
+        client.print("Content-Type: application/x-www-form-urlencoded\n");
+        client.print("Content-Length: ");
+        client.print(postStr.length());
+        client.print("\n\n");
+        client.print(postStr);
+    }
+    client.stop();
+    Serial.println("- stopping the client");
+    
+
 }
 
 //###################################non member function ##############################

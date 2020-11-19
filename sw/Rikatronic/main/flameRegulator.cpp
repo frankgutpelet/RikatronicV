@@ -19,6 +19,7 @@ const char* S_ProgramStateString[FlameRegulator::FLAP_PROGRAM_STATE_COUNT] =
   "Anheizen",
   "Anheizen",
   "Anheizen",
+  "Erhalten",
   "Automatik",
   "Automatik",
   "Aus",
@@ -44,8 +45,8 @@ FlameRegulator::programStateConfig_t FlameRegulator::programStateConfig[FLAP_PRO
     {FLAP_PROGRAM_STATE_HEAT_UP_4,      FLAP_PROGRAM_STATE_HEAT_UP_END,     FLAP_PROGRAM_STATE_HEAT_RESCUE,    80,                     70,                 75,                 60,      "",                             false },
     {FLAP_PROGRAM_STATE_HEAT_UP_END,    FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,    90,                     80,                 80,                 60,      "",                             false },
     {FLAP_PROGRAM_STATE_HEAT_BURN_IDLE, FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,   110,                     85,                 85,                 20,      "Bitte Holz nachlegen",         false },
-    {FLAP_PROGRAM_STATE_HEAT_BURN,      FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   FLAP_PROGRAM_STATE_HEAT_BURN_IDLE,140,                     60,                100,                 30,      "",                             false },
-    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   FLAP_PROGRAM_STATE_HEAT_BURN,    1000,                    100,                 88,                 30,      "",                             false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN,      FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   FLAP_PROGRAM_STATE_HEAT_BURN_IDLE,140,                    100,                 85,                 30,      "",                             false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   FLAP_PROGRAM_STATE_HEAT_BURN,    1000,                    120,                 88,                 30,      "",                             false },
     {FLAP_PROGRAM_STATE_HEAT_OFF,       FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,       30,                      0,                  0,                 10,      "",                             false },
     {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,       40,                     25,                  0,                120,      "Ofen geht aus",                false }
 };
@@ -187,9 +188,11 @@ void FlameRegulator::RecogniceInitialState(void)
 
     programStateConfig_t config = programStateConfig[FLAP_PROGRAM_STATE_HEAT_OFF];
     int temp = this->tempSensor.GetTemp();
+    this->logger->Debug("recognize initial state")
 
     while (temp >= config.tempForNextState)
     {
+        this->logger->Debug(String("new state: ") + this->GetProgramStateStr());
         config = programStateConfig[config.nextstate];
     }
 

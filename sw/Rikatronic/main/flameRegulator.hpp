@@ -1,3 +1,4 @@
+#include <ESP8266WiFi.h>
 #include "Logger.hpp"
 #include "flap.hpp"
 #include "tempSensor.hpp"
@@ -35,7 +36,7 @@ public:
 	// callback functionpointertype for internal memberfunction 
 	typedef void (Flap::* flapFctPointer)(void);
 
-	FlameRegulator(void);
+	FlameRegulator();
 
 	void ProgramStateMachine(); // oly accessed by timer
 
@@ -68,11 +69,7 @@ private:
 		int tempForLastState;
 		int currentFlapPosition;
 		int breakTimeSec;
-		const char* message;
-		bool messageSent;
 	}programStateConfig_t;
-
-	void PushMessage(String message);
 
 	static programStateConfig_t programStateConfig[FLAP_PROGRAM_STATE_COUNT];
 

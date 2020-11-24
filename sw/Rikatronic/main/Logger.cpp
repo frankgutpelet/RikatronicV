@@ -4,6 +4,10 @@
 // Static variable for the one-and-only instance
 static Logger* pInstance;
 
+Logger::Logger()
+{
+   Serial.begin(115200);
+}
 Logger* Logger::instance()
 {
 	if (pInstance == nullptr)

@@ -1,5 +1,4 @@
 #include <ESP8266WiFi.h>
-#include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
@@ -8,8 +7,10 @@
 
 const char* ssid = "SHMOSKITO";
 const char* password = ".ubX54bVSt#vxW11m.";
-const char* myhostname = "RikatronicV";
-const char* curVersion = "1.1.1";
+const char* myhostname = "Rikatronic5";
+const char* curVersion = "1.2.1"; //halte Temperatur bei Power �ber 120�C, bei Rescue ist die Temperaturschwelle h�her um zur�ckzukommen push message weg
+const char* logServer = "api.pushingbox.com";
+const char* PushMessage_DeviceId = "vCDFC7D7572A7731";
 
 ESP8266WebServer server(80);
 FlameRegulator flameRegulator;
@@ -92,7 +93,7 @@ void setup(void) {
   Serial.println(ssid);
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
-
+ 
   if (MDNS.begin("esp8266")) {
     Serial.println("MDNS responder started");
   }
@@ -100,6 +101,7 @@ void setup(void) {
   server.on("/", handleRoot);
     server.send(200, "text/plain", "this works as well");
   indexPage.SetCallback_submit(callback); 
+  
 
   server.on("/gif", []() {
     static const uint8_t gif[] PROGMEM = {

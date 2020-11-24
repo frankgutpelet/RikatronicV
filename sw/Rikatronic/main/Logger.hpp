@@ -14,6 +14,8 @@ public:
 
 	void Error(String logstr);
 
+  Logger();
+
 
 protected:
 

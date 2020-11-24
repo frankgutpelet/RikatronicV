@@ -184,12 +184,12 @@ body {\n\
 			</form>\n\
 		</td>\n\
 		<td>\n\
-			<p>\n\
+			<form>\n\
 				<p class=\"button\" type=\"submit\" onclick=\"eco()\">eco +</p>\n\
 			</form>\n\
 		</td>\n\
 		<td>\n\
-			<p>\n\
+			<form>\n\
 				<p class=\"button\" type=\"submit\" onclick=\"refill()\">nachlegen</p>\n\
 			</form>\n\
 		</td>\n\
@@ -305,12 +305,12 @@ void base::Submit_Callback(void)
 	else
 	{
 		this->state = obj["state"].as < String > ();
-		this->duration = obj["duration"].as < String > ();
 		this->program = obj["program"].as < String > ();
 		this->version = obj["version"].as < String > ();
-		this->flap = obj["flap"].as < String > ();
-		this->calibrated = obj["calibrated"].as < String > ();
 		this->temp = obj["temp"].as < String > ();
+		this->calibrated = obj["calibrated"].as < String > ();
+		this->flap = obj["flap"].as < String > ();
+		this->duration = obj["duration"].as < String > ();
 
 	}
 	if (NULL != this->submit_UserCallback)
@@ -334,16 +334,6 @@ String base::Get_state ( void )
 {
 	return this->state;
 }
-void base::Set_duration (String value)
-{
-	this->duration = value;
-	this->Replace("duration", this->duration);
-}
-
-String base::Get_duration ( void )
-{
-	return this->duration;
-}
 void base::Set_program (String value)
 {
 	this->program = value;
@@ -364,15 +354,15 @@ String base::Get_version ( void )
 {
 	return this->version;
 }
-void base::Set_flap (String value)
+void base::Set_temp (String value)
 {
-	this->flap = value;
-	this->Replace("flap", this->flap);
+	this->temp = value;
+	this->Replace("temp", this->temp);
 }
 
-String base::Get_flap ( void )
+String base::Get_temp ( void )
 {
-	return this->flap;
+	return this->temp;
 }
 void base::Set_calibrated (String value)
 {
@@ -384,15 +374,25 @@ String base::Get_calibrated ( void )
 {
 	return this->calibrated;
 }
-void base::Set_temp (String value)
+void base::Set_flap (String value)
 {
-	this->temp = value;
-	this->Replace("temp", this->temp);
+	this->flap = value;
+	this->Replace("flap", this->flap);
 }
 
-String base::Get_temp ( void )
+String base::Get_flap ( void )
 {
-	return this->temp;
+	return this->flap;
+}
+void base::Set_duration (String value)
+{
+	this->duration = value;
+	this->Replace("duration", this->duration);
+}
+
+String base::Get_duration ( void )
+{
+	return this->duration;
 }
 void base::Render( void )
 {

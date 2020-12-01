@@ -8,7 +8,7 @@
 const char* ssid = "SHMOSKITO";
 const char* password = ".ubX54bVSt#vxW11m.";
 const char* myhostname = "RikatronicV";
-const char* curVersion = "1.3.0"; //2 weitere Brennstufen bei grosser Hitze
+const char* curVersion = "1.4.0"; //2 weitere Brennstufen bei grosser Hitze, eco und power drosselklappenunterschied 3% bei allen automatic brennstufen
 const char* logServer = "api.pushingbox.com";
 const char* PushMessage_DeviceId = "vCDFC7D7572A7731";
 

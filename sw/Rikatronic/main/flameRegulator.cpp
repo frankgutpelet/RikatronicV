@@ -27,11 +27,20 @@ const char* S_ProgramStateString[FlameRegulator::FLAP_PROGRAM_STATE_COUNT] =
   "Rettung"
 };
 
-const char* S_FlapRegulationModeString[FlameRegulator::FLAP_MODE_Count]
+const char* S_FlapRegulationModeString[FlameRegulator::FLAP_MODE_Count] =
 {
   "MANUAL",
   "ECO",
   "POWER"
+};
+
+// these states flapstatates will be manipulated when chosing eco or power mode 
+const FlameRegulator::FlapProgramState_e S_modifyByMode[] =
+{
+    FlameRegulator::FLAP_PROGRAM_STATE_HEAT_BURN,
+    FlameRegulator::FLAP_PROGRAM_STATE_HEAT_BURN_HOT,
+    FlameRegulator::FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,
+    FlameRegulator::FLAP_PROGRAM_STATE_HEAT_BURN_HOT3
 };
 
 FlameRegulator::programStateConfig_t FlameRegulator::programStateConfig[FLAP_PROGRAM_STATE_COUNT]=
@@ -78,6 +87,21 @@ tempSensor{TempSensor(ANALOG_INPUT)}
 void FlameRegulator::SetFlapRegulationMode(flapMode_e flapRegulationMode)
 {
     this->flapRegulationMode = flapRegulationMode;
+
+    if (FLAP_MODE_ECO == flapRegulationMode)
+    {
+        for (int i = 0; i < (sizeof(S_modifyByMode)/sizeof(S_modifyByMode[0])); i++)
+        {
+            this->programStateConfig[S_modifyByMode[i]].currentFlapPosition += 3;
+        }
+    }
+    else if (FLAP_MODE_ECO == flapRegulationMode)
+    {
+        for (int i = 0; i < (sizeof(S_modifyByMode) / sizeof(S_modifyByMode[0])); i++)
+        {
+            this->programStateConfig[S_modifyByMode[i]].currentFlapPosition -= 3;
+        }
+    }
 }
 
 String FlameRegulator::GetFlapRegulationModeStr(void)

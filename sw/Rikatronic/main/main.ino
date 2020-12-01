@@ -7,8 +7,8 @@
 
 const char* ssid = "SHMOSKITO";
 const char* password = ".ubX54bVSt#vxW11m.";
-const char* myhostname = "Rikatronic5";
-const char* curVersion = "1.2.1"; //halte Temperatur bei Power �ber 120�C, bei Rescue ist die Temperaturschwelle h�her um zur�ckzukommen push message weg
+const char* myhostname = "RikatronicV";
+const char* curVersion = "1.3.0"; //2 weitere Brennstufen bei grosser Hitze
 const char* logServer = "api.pushingbox.com";
 const char* PushMessage_DeviceId = "vCDFC7D7572A7731";
 

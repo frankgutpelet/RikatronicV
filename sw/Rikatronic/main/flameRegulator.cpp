@@ -52,7 +52,7 @@ FlameRegulator::programStateConfig_t FlameRegulator::programStateConfig[FLAP_PRO
     {FLAP_PROGRAM_STATE_HEAT_BURN_HOT2, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   170,                    150,                90,                 30 },
     {FLAP_PROGRAM_STATE_HEAT_BURN_HOT3, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  1000,                   160,                92,                 30 },
     {FLAP_PROGRAM_STATE_HEAT_OFF,       FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        30,                      0,                  0,                 10 },
-    {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        80,                     25,                  0,                120 }
+    {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        80,                     25,                  1,                120 }
 };
 
 

@@ -165,9 +165,13 @@ body {
 		<td class="auto-style2" style="width: 484px"><strong>Modus</strong></td>
 		<td class="auto-style2"><strong id="state"></strong></td>
 	</tr>
+	<tr>
+		<td class="auto-style2" style="width: 484px"><strong>Beep</strong></td>
+		<td class="auto-style2"><strong id="beep"></strong></td>
+	</tr>
 </table>
 </p>
-<table class="auto-style2" style="width: 100%">
+<table class="auto-style3" style="width: 100%">
 	<tr>
 		<td>
 			<form>
@@ -184,9 +188,21 @@ body {
 				<p class="button" type="submit" onclick="eco()">eco +</p>
 			</form>
 		</td>
+		</tr>
+		<tr>
 		<td>
 			<form>
 				<p class="button" type="submit" onclick="refill()">nachlegen</p>
+			</form>
+		</td>
+		<td>
+			<form>
+				<p class="button" type="submit" onclick="beep()">beep</p>
+			</form>
+		</td>
+		<td>
+			<form>
+				<p class="button" type="submit" onclick="testBeep()">test</p>
 			</form>
 		</td>
 	</tr>
@@ -228,7 +244,8 @@ body {
 		"program" : "0",
 		"duration" : "0",
 		"calibrated" : "0",
-		"version" : "0"}
+		"version" : "0",
+		"beep" : "0"}
 
 	document.getElementById("version").innerHTML = "Version: " + values.version
 		
@@ -238,6 +255,7 @@ body {
 	document.getElementById("state").innerHTML = values.state
 	document.getElementById("duration").innerHTML = values.duration
 	document.getElementById("program").innerHTML = values.program
+	document.getElementById("beep").innerHTML = values.beep
 	document.getElementById("submitBtn").value = JSON.stringify(values)
 
 	function refill()
@@ -262,6 +280,25 @@ body {
 	{
 		values.state = "MANUAL"
 		document.getElementById("state").innerHTML = values.state
+		document.getElementById("submitBtn").value = JSON.stringify(values)
+	}
+	function beep()
+	{
+		if ("ON" == values.beep)
+		{
+			values.beep = "OFF"
+		}
+		else
+		{
+			values.beep = "ON"
+		}
+		document.getElementById("beep").innerHTML = values.beep
+		document.getElementById("submitBtn").value = JSON.stringify(values)
+	}
+	function testBeep()
+	{
+		values.beep = "TEST"
+		document.getElementById("beep").innerHTML = values.beep
 		document.getElementById("submitBtn").value = JSON.stringify(values)
 	}
 	function sliderChange()

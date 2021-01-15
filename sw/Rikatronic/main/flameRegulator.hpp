@@ -34,6 +34,8 @@ public:
 		FLAP_PROGRAM_STATE_HEAT_RESCUE,
 		FLAP_PROGRAM_STATE_COUNT
 	}FlapProgramState_e;
+
+	bool mute; // Mute the beep 
 	
 	// callback functionpointertype for internal memberfunction 
 	typedef void (Flap::* flapFctPointer)(void);
@@ -47,6 +49,10 @@ public:
 	void Heat_Up(); // start "heat up" programm
 
 	void SetManual(int pos); // set the flap position manual
+
+	void Beep(bool swOn);
+	void ToggleBeep(void);
+	void Mute(int seconds);
 
 	// set and get the flap regulation mode	
 	void SetFlapRegulationMode(flapMode_e flapRegulationMode);
@@ -71,17 +77,20 @@ private:
 		int tempForLastState;
 		int currentFlapPosition;
 		int breakTimeSec;
+		bool beep;
 	}programStateConfig_t;
 
 	static programStateConfig_t programStateConfig[FLAP_PROGRAM_STATE_COUNT];
+  static programStateConfig_t programStateConfigEco[FLAP_PROGRAM_STATE_COUNT];
 
 	flapMode_e flapRegulationMode;
 	FlapProgramState_e programState;
 	Flap flap;
 	TempSensor tempSensor;
-  os_timer_t timer;
-  Logger* logger;
+	os_timer_t timer;
+	Logger* logger;
 	int action_timeSec;
+	int secondsToUnmute;
 
 	// recognizes the initial state after startup
 	void RecogniceInitialState();

@@ -169,9 +169,13 @@ body {\n\
 		<td class=\"auto-style2\" style=\"width: 484px\"><strong>Modus</strong></td>\n\
 		<td class=\"auto-style2\"><strong id=\"state\"></strong></td>\n\
 	</tr>\n\
+	<tr>\n\
+		<td class=\"auto-style2\" style=\"width: 484px\"><strong>Beep</strong></td>\n\
+		<td class=\"auto-style2\"><strong id=\"beep\"></strong></td>\n\
+	</tr>\n\
 </table>\n\
 </p>\n\
-<table class=\"auto-style2\" style=\"width: 100%\">\n\
+<table class=\"auto-style3\" style=\"width: 100%\">\n\
 	<tr>\n\
 		<td>\n\
 			<form>\n\
@@ -188,9 +192,21 @@ body {\n\
 				<p class=\"button\" type=\"submit\" onclick=\"eco()\">eco +</p>\n\
 			</form>\n\
 		</td>\n\
+		</tr>\n\
+		<tr>\n\
 		<td>\n\
 			<form>\n\
 				<p class=\"button\" type=\"submit\" onclick=\"refill()\">nachlegen</p>\n\
+			</form>\n\
+		</td>\n\
+		<td>\n\
+			<form>\n\
+				<p class=\"button\" type=\"submit\" onclick=\"beep()\">beep</p>\n\
+			</form>\n\
+		</td>\n\
+		<td>\n\
+			<form>\n\
+				<p class=\"button\" type=\"submit\" onclick=\"testBeep()\">test</p>\n\
 			</form>\n\
 		</td>\n\
 	</tr>\n\
@@ -232,7 +248,8 @@ body {\n\
 		\"program\" : \"0\",            \n\
 		\"duration\" : \"0\",           \n\
 		\"calibrated\" : \"0\",         \n\
-		\"version\" : \"0\"}            \n\
+		\"version\" : \"0\",            \n\
+		\"beep\" : \"0\"}               \n\
 \n\
 	document.getElementById(\"version\").innerHTML = \"Version: \" + values.version\n\
 		\n\
@@ -242,6 +259,7 @@ body {\n\
 	document.getElementById(\"state\").innerHTML = values.state\n\
 	document.getElementById(\"duration\").innerHTML = values.duration\n\
 	document.getElementById(\"program\").innerHTML = values.program\n\
+	document.getElementById(\"beep\").innerHTML = values.beep\n\
 	document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
 \n\
 	function refill()\n\
@@ -266,6 +284,25 @@ body {\n\
 	{\n\
 		values.state = \"MANUAL\"\n\
 		document.getElementById(\"state\").innerHTML = values.state\n\
+		document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
+	}\n\
+	function beep()\n\
+	{\n\
+		if (\"ON\" == values.beep)\n\
+		{\n\
+			values.beep = \"OFF\"\n\
+		}\n\
+		else\n\
+		{\n\
+			values.beep = \"ON\"\n\
+		}\n\
+		document.getElementById(\"beep\").innerHTML = values.beep\n\
+		document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
+	}\n\
+	function testBeep()\n\
+	{\n\
+		values.beep = \"TEST\"\n\
+		document.getElementById(\"beep\").innerHTML = values.beep\n\
 		document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
 	}\n\
 	function sliderChange()\n\
@@ -304,13 +341,14 @@ void base::Submit_Callback(void)
 	}
 	else
 	{
-		this->state = obj["state"].as < String > ();
+		this->beep = obj["beep"].as < String > ();
 		this->program = obj["program"].as < String > ();
 		this->version = obj["version"].as < String > ();
 		this->temp = obj["temp"].as < String > ();
-		this->calibrated = obj["calibrated"].as < String > ();
-		this->flap = obj["flap"].as < String > ();
+		this->state = obj["state"].as < String > ();
 		this->duration = obj["duration"].as < String > ();
+		this->flap = obj["flap"].as < String > ();
+		this->calibrated = obj["calibrated"].as < String > ();
 
 	}
 	if (NULL != this->submit_UserCallback)
@@ -324,15 +362,15 @@ void base::SetCallback_submit (void (*callback)(void))
 	this->submit_UserCallback = callback;
 }
 
-void base::Set_state (String value)
+void base::Set_beep (String value)
 {
-	this->state = value;
-	this->Replace("state", this->state);
+	this->beep = value;
+	this->Replace("beep", this->beep);
 }
 
-String base::Get_state ( void )
+String base::Get_beep ( void )
 {
-	return this->state;
+	return this->beep;
 }
 void base::Set_program (String value)
 {
@@ -364,15 +402,25 @@ String base::Get_temp ( void )
 {
 	return this->temp;
 }
-void base::Set_calibrated (String value)
+void base::Set_state (String value)
 {
-	this->calibrated = value;
-	this->Replace("calibrated", this->calibrated);
+	this->state = value;
+	this->Replace("state", this->state);
 }
 
-String base::Get_calibrated ( void )
+String base::Get_state ( void )
 {
-	return this->calibrated;
+	return this->state;
+}
+void base::Set_duration (String value)
+{
+	this->duration = value;
+	this->Replace("duration", this->duration);
+}
+
+String base::Get_duration ( void )
+{
+	return this->duration;
 }
 void base::Set_flap (String value)
 {
@@ -384,15 +432,15 @@ String base::Get_flap ( void )
 {
 	return this->flap;
 }
-void base::Set_duration (String value)
+void base::Set_calibrated (String value)
 {
-	this->duration = value;
-	this->Replace("duration", this->duration);
+	this->calibrated = value;
+	this->Replace("calibrated", this->calibrated);
 }
 
-String base::Get_duration ( void )
+String base::Get_calibrated ( void )
 {
-	return this->duration;
+	return this->calibrated;
 }
 void base::Render( void )
 {

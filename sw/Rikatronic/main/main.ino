@@ -4,17 +4,19 @@
 #include <ESP8266mDNS.h>
 #include "base.hpp"
 #include "flameRegulator.hpp"
+#include "button.hpp"
 
 const char* ssid = "SHMOSKITO";
 const char* password = ".ubX54bVSt#vxW11m.";
-const char* myhostname = "RikatronicV";
-const char* curVersion = "1.4.1"; //eco rueckgangig gemacht
+const char* myhostname = "RikatronicVI";
+const char* curVersion = "2.0.0"; //Power wird zu ECO, +Power Programm, Beep für nachlegen, Button für nachlegen - für neue HW Version 2
 const char* logServer = "api.pushingbox.com";
 const char* PushMessage_DeviceId = "vCDFC7D7572A7731";
 
 ESP8266WebServer server(80);
 FlameRegulator flameRegulator;
 base indexPage(&server);
+Button RefillButton;
 
 void handleRoot() 
 {
@@ -40,10 +42,25 @@ void handleRoot()
     Serial.println("refill");
     flameRegulator.Refill();
   }
+  else if (String("TEST") == indexPage.Get_beep())
+  {
+      flameRegulator.Beep(true);
+      delay(1000);
+      flameRegulator.Beep(false);
+  }
+  else if (String("ON") == indexPage.Get_beep())
+  {
+      flameRegulator.mute = false;
+  }
+  else if (String("OFF") == indexPage.Get_beep())
+  {
+      flameRegulator.mute = true;
+  }
   indexPage.Set_state(flameRegulator.GetFlapRegulationModeStr());
   indexPage.Set_program(flameRegulator.GetProgramStateStr());
   indexPage.Set_flap(String(flameRegulator.GetFlapPosition()));
   indexPage.Set_temp(String(flameRegulator.GetTemperature()));
+  indexPage.Set_beep(flameRegulator.mute ? "OFF" : "ON");
   indexPage.Set_version(curVersion);
   indexPage.Render();
 }
@@ -129,4 +146,10 @@ void setup(void) {
 void loop(void) {
   server.handleClient();
   MDNS.update();
+  if (RefillButton.IsPressed())
+  {
+    Serial.println("refill");
+    flameRegulator.Refill();
+    delay(200);
+  }
 }

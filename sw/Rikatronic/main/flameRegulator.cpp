@@ -3,6 +3,7 @@
 #define ANALOG_INPUT 0
 #define RELAIS_OUTPUT 16
 #define PWM_OUTPUT 5
+#define BEEP_PIN 4
 
 const char* S_PushMessage_DeviceId = "vCDFC7D7572A7731";
 const char* S_logServer = "api.pushingbox.com";
@@ -38,21 +39,41 @@ const char* S_FlapRegulationModeString[FlameRegulator::FLAP_MODE_Count] =
 FlameRegulator::programStateConfig_t FlameRegulator::programStateConfig[FLAP_PROGRAM_STATE_COUNT]=
         //state                                 nextstate                       laststate               tempForNextState    tempForLastState    currentFlapPosition     breakTimeSec
 {
-    {FLAP_PROGRAM_STATE_NONE,           FLAP_PROGRAM_STATE_NONE,            FLAP_PROGRAM_STATE_NONE,            0,                      0,                  0,                  0 },
-    {FLAP_PROGRAM_STATE_REFILL,         FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     0,                      0,                  0,                  0 },
-    {FLAP_PROGRAM_STATE_HEAT_UP_START,  FLAP_PROGRAM_STATE_HEAT_UP_1,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     40,                     30,                 20,                 60 },
-    {FLAP_PROGRAM_STATE_HEAT_UP_1,      FLAP_PROGRAM_STATE_HEAT_UP_2,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     50,                     40,                 40,                 60 },
-    {FLAP_PROGRAM_STATE_HEAT_UP_2,      FLAP_PROGRAM_STATE_HEAT_UP_3,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     60,                     50,                 60,                 60 },
-    {FLAP_PROGRAM_STATE_HEAT_UP_3,      FLAP_PROGRAM_STATE_HEAT_UP_4,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     70,                     60,                 70,                 60 },
-    {FLAP_PROGRAM_STATE_HEAT_UP_4,      FLAP_PROGRAM_STATE_HEAT_UP_END,     FLAP_PROGRAM_STATE_HEAT_RESCUE,     80,                     70,                 75,                 60 },
-    {FLAP_PROGRAM_STATE_HEAT_UP_END,    FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     90,                     80,                 80,                 60 },
-    {FLAP_PROGRAM_STATE_HEAT_BURN_IDLE, FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     120,                     85,                75,                 20 },
-    {FLAP_PROGRAM_STATE_HEAT_BURN,      FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   FLAP_PROGRAM_STATE_HEAT_BURN_IDLE,  140,                    115,                85,                 30 },
-    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  FLAP_PROGRAM_STATE_HEAT_BURN,       155,                    130,                88,                 30 },
-    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT2, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   170,                    150,                90,                 30 },
-    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT3, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  1000,                   160,                92,                 30 },
-    {FLAP_PROGRAM_STATE_HEAT_OFF,       FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        30,                      0,                  0,                 10 },
-    {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        80,                     25,                  1,                120 }
+    {FLAP_PROGRAM_STATE_NONE,           FLAP_PROGRAM_STATE_NONE,            FLAP_PROGRAM_STATE_NONE,            0,                      0,                  0,                  0,   false },
+    {FLAP_PROGRAM_STATE_REFILL,         FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     0,                      0,                  0,                  0,   false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_START,  FLAP_PROGRAM_STATE_HEAT_UP_1,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     40,                     30,                 20,                 60,  false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_1,      FLAP_PROGRAM_STATE_HEAT_UP_2,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     50,                     40,                 40,                 60,  false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_2,      FLAP_PROGRAM_STATE_HEAT_UP_3,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     60,                     50,                 60,                 60,  false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_3,      FLAP_PROGRAM_STATE_HEAT_UP_4,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     70,                     60,                 70,                 60,  false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_4,      FLAP_PROGRAM_STATE_HEAT_UP_END,     FLAP_PROGRAM_STATE_HEAT_RESCUE,     80,                     70,                 75,                 60,  false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_END,    FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     90,                     80,                 80,                 60,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_IDLE, FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     120,                     85,                75,                 20,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN,      FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   FLAP_PROGRAM_STATE_HEAT_BURN_IDLE,  160,                    115,                85,                 30,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  FLAP_PROGRAM_STATE_HEAT_BURN,       175,                    140,                88,                 30,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT2, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   220,                    170,                90,                 30,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT3, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  1000,                   200,                92,                 30,  false },
+    {FLAP_PROGRAM_STATE_HEAT_OFF,       FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        30,                      0,                  0,                 10,  false },
+    {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        80,                     25,                  1,                120,  false }
+};
+
+FlameRegulator::programStateConfig_t FlameRegulator::programStateConfigEco[FLAP_PROGRAM_STATE_COUNT]=
+        //state                                 nextstate                       laststate               tempForNextState    tempForLastState    currentFlapPosition     breakTimeSec
+{
+    {FLAP_PROGRAM_STATE_NONE,           FLAP_PROGRAM_STATE_NONE,            FLAP_PROGRAM_STATE_NONE,            0,                      0,                  0,                  0,   false },
+    {FLAP_PROGRAM_STATE_REFILL,         FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     0,                      0,                  0,                  0,   false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_START,  FLAP_PROGRAM_STATE_HEAT_UP_1,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     40,                     30,                 20,                 60,  false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_1,      FLAP_PROGRAM_STATE_HEAT_UP_2,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     50,                     40,                 40,                 60,  false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_2,      FLAP_PROGRAM_STATE_HEAT_UP_3,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     60,                     50,                 60,                 60,  false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_3,      FLAP_PROGRAM_STATE_HEAT_UP_4,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     70,                     60,                 70,                 60,  false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_4,      FLAP_PROGRAM_STATE_HEAT_UP_END,     FLAP_PROGRAM_STATE_HEAT_RESCUE,     80,                     70,                 75,                 60,  false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_END,    FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     90,                     80,                 80,                 60,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_IDLE, FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     120,                     85,                75,                 20,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN,      FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   FLAP_PROGRAM_STATE_HEAT_BURN_IDLE,  140,                    115,                85,                 30,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  FLAP_PROGRAM_STATE_HEAT_BURN,       155,                    130,                88,                 30,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT2, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   170,                    150,                90,                 30,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT3, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  1000,                   160,                92,                 30,  false },
+    {FLAP_PROGRAM_STATE_HEAT_OFF,       FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        30,                      0,                  0,                 10,  false },
+    {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        80,                     25,                  1,                120,  false }
 };
 
 
@@ -70,7 +91,10 @@ tempSensor{TempSensor(ANALOG_INPUT)}
     this->flapRegulationMode = FLAP_MODE_POWER;
     this->logger = Logger::instance();
     this->RecogniceInitialState();
-
+    this->mute = false;
+    this->secondsToUnmute = -1;
+    pinMode(BEEP_PIN, OUTPUT);
+    
 	// initialize tinmer
 	os_timer_setfn(&(this->timer), timerCallback, this);
 	os_timer_arm(&(this->timer), 1000, true);
@@ -104,7 +128,8 @@ void FlameRegulator::Refill(void)
 {
     this->flap.SwitchOff();
     this->programState = FLAP_PROGRAM_STATE_REFILL;
-    this->action_timeSec = 20;
+    this->action_timeSec = 60;
+    this->Mute(600); //mute for 10 minutes
 }
 
 void FlameRegulator::SetManual(int pos)
@@ -125,18 +150,85 @@ void FlameRegulator::SetManual(int pos)
 
     this->flap.SetPosition(pos);
 }
+void FlameRegulator::Beep(bool swOn)
+{
+  if (swOn)
+  {
+    digitalWrite(BEEP_PIN, HIGH);
+  }
+  else
+  {
+    digitalWrite(BEEP_PIN, LOW);
+  }
+}
+
+void FlameRegulator::ToggleBeep(void)
+{
+    static bool beepIsOn = false;
+    if (false == beepIsOn)
+    {
+        digitalWrite(BEEP_PIN, HIGH);
+        beepIsOn = true;
+
+    }
+    else
+    {
+        digitalWrite(BEEP_PIN, LOW);
+        beepIsOn = false;
+    }
+}
+
+void FlameRegulator::Mute(int seconds)
+{
+    if (false == this->mute)
+    {
+        this->mute = true;
+        this->secondsToUnmute = seconds;
+    } 
+}
 
 //###################################   state Machine     ##############################
 
 void FlameRegulator::ProgramStateMachine (void)
 {
-    programStateConfig_t* currentConfig = &this->programStateConfig[(int)this->programState];
+    programStateConfig_t* currentConfig;
+    
+    if (FLAP_MODE_ECO == this->flapRegulationMode)
+    {
+        currentConfig = &this->programStateConfigEco[(int)this->programState];
+    }
+    else
+    {
+        currentConfig = &this->programStateConfig[(int)this->programState];
+    }
+    if (this->mute)
+        this->logger->Debug("Mute");
+    else
+        this->logger->Debug("Unmute");
+
+    if (0 >= this->secondsToUnmute)
+    {
+        if (0 == this->secondsToUnmute)
+        {
+            this->mute = false;
+        }
+        this->secondsToUnmute--;
+    }    
 
     if (0 != this->action_timeSec)
     {
+        if ((false == this->mute) && (currentConfig->beep))
+        {
+            this->ToggleBeep();
+        }
+        else
+        {
+            this->Beep(false);
+        }
         this->action_timeSec--;
         return;
     }
+
 
     // do nothin if manual regulation
     if (FLAP_MODE_MANUAL == this->flapRegulationMode)

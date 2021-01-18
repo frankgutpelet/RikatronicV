@@ -8,8 +8,8 @@
 
 const char* ssid = "SHMOSKITO";
 const char* password = ".ubX54bVSt#vxW11m.";
-const char* myhostname = "RikatronicVI";
-const char* curVersion = "2.0.0"; //Power wird zu ECO, +Power Programm, Beep für nachlegen, Button für nachlegen - für neue HW Version 2
+const char* myhostname = "RikatronicV";
+const char* curVersion = "2.0.1"; //Power wird zu ECO, +Power Programm, Beep für nachlegen, Button für nachlegen - für neue HW Version 2
 const char* logServer = "api.pushingbox.com";
 const char* PushMessage_DeviceId = "vCDFC7D7572A7731";
 

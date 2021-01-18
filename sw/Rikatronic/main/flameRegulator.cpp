@@ -47,13 +47,13 @@ FlameRegulator::programStateConfig_t FlameRegulator::programStateConfig[FLAP_PRO
     {FLAP_PROGRAM_STATE_HEAT_UP_3,      FLAP_PROGRAM_STATE_HEAT_UP_4,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     70,                     60,                 70,                 60,  false },
     {FLAP_PROGRAM_STATE_HEAT_UP_4,      FLAP_PROGRAM_STATE_HEAT_UP_END,     FLAP_PROGRAM_STATE_HEAT_RESCUE,     80,                     70,                 75,                 60,  false },
     {FLAP_PROGRAM_STATE_HEAT_UP_END,    FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     90,                     80,                 80,                 60,  false },
-    {FLAP_PROGRAM_STATE_HEAT_BURN_IDLE, FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     120,                     85,                75,                 20,  false },
-    {FLAP_PROGRAM_STATE_HEAT_BURN,      FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   FLAP_PROGRAM_STATE_HEAT_BURN_IDLE,  160,                    115,                85,                 30,  false },
-    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  FLAP_PROGRAM_STATE_HEAT_BURN,       175,                    140,                88,                 30,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_IDLE, FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     150,                     85,                75,                 20,  true },
+    {FLAP_PROGRAM_STATE_HEAT_BURN,      FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   FLAP_PROGRAM_STATE_HEAT_BURN_IDLE,  160,                    140,                85,                 30,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  FLAP_PROGRAM_STATE_HEAT_BURN,       175,                    150,                88,                 30,  false },
     {FLAP_PROGRAM_STATE_HEAT_BURN_HOT2, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   220,                    170,                90,                 30,  false },
     {FLAP_PROGRAM_STATE_HEAT_BURN_HOT3, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  1000,                   200,                92,                 30,  false },
     {FLAP_PROGRAM_STATE_HEAT_OFF,       FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        30,                      0,                  0,                 10,  false },
-    {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        80,                     25,                  1,                120,  false }
+    {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        80,                     25,                  1,                120,  true }
 };
 
 FlameRegulator::programStateConfig_t FlameRegulator::programStateConfigEco[FLAP_PROGRAM_STATE_COUNT]=
@@ -73,7 +73,7 @@ FlameRegulator::programStateConfig_t FlameRegulator::programStateConfigEco[FLAP_
     {FLAP_PROGRAM_STATE_HEAT_BURN_HOT2, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   170,                    150,                90,                 30,  false },
     {FLAP_PROGRAM_STATE_HEAT_BURN_HOT3, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  1000,                   160,                92,                 30,  false },
     {FLAP_PROGRAM_STATE_HEAT_OFF,       FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        30,                      0,                  0,                 10,  false },
-    {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        80,                     25,                  1,                120,  false }
+    {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        80,                     25,                  1,                120,  true }
 };
 
 
@@ -185,6 +185,10 @@ void FlameRegulator::Mute(int seconds)
         this->mute = true;
         this->secondsToUnmute = seconds;
     } 
+    else
+    {
+        this->secondsToUnmute = -1;
+    }
 }
 
 //###################################   state Machine     ##############################
@@ -206,8 +210,9 @@ void FlameRegulator::ProgramStateMachine (void)
     else
         this->logger->Debug("Unmute");
 
-    if (0 >= this->secondsToUnmute)
+    if ((int) 0 <= this->secondsToUnmute)
     {
+        this->logger->Debug(String(secondsToUnmute));
         if (0 == this->secondsToUnmute)
         {
             this->mute = false;
@@ -215,16 +220,18 @@ void FlameRegulator::ProgramStateMachine (void)
         this->secondsToUnmute--;
     }    
 
+    if ((false == this->mute) && (currentConfig->beep))
+    {
+        this->logger->Debug("Beep");
+        this->ToggleBeep();
+    }
+    else
+    {
+        this->Beep(false);
+    }
+
     if (0 != this->action_timeSec)
     {
-        if ((false == this->mute) && (currentConfig->beep))
-        {
-            this->ToggleBeep();
-        }
-        else
-        {
-            this->Beep(false);
-        }
         this->action_timeSec--;
         return;
     }

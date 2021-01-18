@@ -6,7 +6,7 @@
 #define RESISTANCE_DEVIDER_R1 (1000)
 #define SYSTEM_VOLTAGE ((double) 3.3)
 #define ADC_RESOLUTION_HIGHEST 1023
-#define TMP_OFFSET (-17)
+#define TMP_OFFSET (-30)
 #define TMP_FACTOR (1)
 
 TempSensor::TempSensor(int analogInput)

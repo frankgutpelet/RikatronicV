@@ -1,8 +1,14 @@
 #include "flap.hpp"
 #include <Arduino.h>
-#define PWM_FACTOR (((double)1023 * 10) / (100 * 24))
-#define PWM_OFFSET 90
-#define TIMER_INTERVAL_MS        1000
+// Benni Ofen
+#define PWM_FACTOR (((double)1023 * 4) / (100 * 21))
+#define PWM_OFFSET 49
+// Frank Ofen
+//#define PWM_FACTOR (((double)1023 * 3) / (100 * 27))
+//#define PWM_OFFSET 39
+// HW version 1
+//#define PWM_FACTOR (((double)1023) / (100 * 24))
+//#define PWM_OFFSET 0
 
 Flap::Flap(int pwmPin, int relaisPin)
 {

@@ -329,27 +329,36 @@ base::base(ESP8266WebServer* server)
 }
 void base::Submit_Callback(void)
 {
-	String jsonstring = this->server->arg("action");
-	DeserializationError error = deserializeJson(doc, jsonstring);
-	Serial.println(jsonstring);
-	JsonObject obj = doc.as < JsonObject > ();
-
-	if (error)
+	String jsonstring;
+	
+	if (this->server->hasArg("REFILL"))
 	{
-	Serial.print(F("deserializeJson() failed: "));
-	Serial.println(error.f_str());
+		this->program = REFILL;
 	}
 	else
 	{
-		this->beep = obj["beep"].as < String > ();
-		this->program = obj["program"].as < String > ();
-		this->version = obj["version"].as < String > ();
-		this->temp = obj["temp"].as < String > ();
-		this->state = obj["state"].as < String > ();
-		this->duration = obj["duration"].as < String > ();
-		this->flap = obj["flap"].as < String > ();
-		this->calibrated = obj["calibrated"].as < String > ();
+		jsonstring = this->server->arg("action");
+		DeserializationError error = deserializeJson(doc, jsonstring);
+		Serial.println(jsonstring);
+		JsonObject obj = doc.as < JsonObject > ();
 
+		if (error)
+		{
+		Serial.print(F("deserializeJson() failed: "));
+		Serial.println(error.f_str());
+		}
+		else
+		{
+			this->beep = obj["beep"].as < String > ();
+			this->program = obj["program"].as < String > ();
+			this->version = obj["version"].as < String > ();
+			this->temp = obj["temp"].as < String > ();
+			this->state = obj["state"].as < String > ();
+			this->duration = obj["duration"].as < String > ();
+			this->flap = obj["flap"].as < String > ();
+			this->calibrated = obj["calibrated"].as < String > ();
+
+		}
 	}
 	if (NULL != this->submit_UserCallback)
 	{

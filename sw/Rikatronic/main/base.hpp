@@ -1,5 +1,6 @@
 #include <ESP8266WebServer.h>
 #include <Arduino.h>
+#include "Logger.hpp"
 
 class base
 {
@@ -39,4 +40,5 @@ class base
 		String duration;
 		String flap;
 		String calibrated;
+    Logger* logger;
 };

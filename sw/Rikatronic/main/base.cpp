@@ -326,14 +326,17 @@ base::base(ESP8266WebServer* server)
 	this->server = server;
 	this->submit_UserCallback = (void(*)()) NULL;
 	this->server->on("/submit", std::bind( & base::Submit_Callback, this));
+  this->logger = Logger::instance();
 }
 void base::Submit_Callback(void)
 {
 	String jsonstring;
-	
+  this->logger->Debug("received HTTP comand");
+  
 	if (this->server->hasArg("REFILL"))
 	{
-		this->program = REFILL;
+    this->logger->Debug("received HTTP GET comand");
+		this->program = "REFILL";
 	}
 	else
 	{

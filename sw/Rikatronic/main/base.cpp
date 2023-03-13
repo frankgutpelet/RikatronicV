@@ -326,42 +326,30 @@ base::base(ESP8266WebServer* server)
 	this->server = server;
 	this->submit_UserCallback = (void(*)()) NULL;
 	this->server->on("/submit", std::bind( & base::Submit_Callback, this));
-  this->logger = Logger::instance();
 }
 void base::Submit_Callback(void)
 {
-	String jsonstring;
-  this->logger->Debug("received HTTP comand");
-  
-	if (this->server->hasArg("REFILL"))
+	String jsonstring = this->server->arg("action");
+	DeserializationError error = deserializeJson(doc, jsonstring);
+	Serial.println(jsonstring);
+	JsonObject obj = doc.as < JsonObject > ();
+
+	if (error)
 	{
-    this->logger->Debug("received HTTP GET comand");
-		this->program = "REFILL";
+	Serial.print(F("deserializeJson() failed: "));
+	Serial.println(error.f_str());
 	}
 	else
 	{
-		jsonstring = this->server->arg("action");
-		DeserializationError error = deserializeJson(doc, jsonstring);
-		Serial.println(jsonstring);
-		JsonObject obj = doc.as < JsonObject > ();
+		this->calibrated = obj["calibrated"].as < String > ();
+		this->beep = obj["beep"].as < String > ();
+		this->state = obj["state"].as < String > ();
+		this->flap = obj["flap"].as < String > ();
+		this->temp = obj["temp"].as < String > ();
+		this->duration = obj["duration"].as < String > ();
+		this->version = obj["version"].as < String > ();
+		this->program = obj["program"].as < String > ();
 
-		if (error)
-		{
-		Serial.print(F("deserializeJson() failed: "));
-		Serial.println(error.f_str());
-		}
-		else
-		{
-			this->beep = obj["beep"].as < String > ();
-			this->program = obj["program"].as < String > ();
-			this->version = obj["version"].as < String > ();
-			this->temp = obj["temp"].as < String > ();
-			this->state = obj["state"].as < String > ();
-			this->duration = obj["duration"].as < String > ();
-			this->flap = obj["flap"].as < String > ();
-			this->calibrated = obj["calibrated"].as < String > ();
-
-		}
 	}
 	if (NULL != this->submit_UserCallback)
 	{
@@ -374,6 +362,16 @@ void base::SetCallback_submit (void (*callback)(void))
 	this->submit_UserCallback = callback;
 }
 
+void base::Set_calibrated (String value)
+{
+	this->calibrated = value;
+	this->Replace("calibrated", this->calibrated);
+}
+
+String base::Get_calibrated ( void )
+{
+	return this->calibrated;
+}
 void base::Set_beep (String value)
 {
 	this->beep = value;
@@ -383,36 +381,6 @@ void base::Set_beep (String value)
 String base::Get_beep ( void )
 {
 	return this->beep;
-}
-void base::Set_program (String value)
-{
-	this->program = value;
-	this->Replace("program", this->program);
-}
-
-String base::Get_program ( void )
-{
-	return this->program;
-}
-void base::Set_version (String value)
-{
-	this->version = value;
-	this->Replace("version", this->version);
-}
-
-String base::Get_version ( void )
-{
-	return this->version;
-}
-void base::Set_temp (String value)
-{
-	this->temp = value;
-	this->Replace("temp", this->temp);
-}
-
-String base::Get_temp ( void )
-{
-	return this->temp;
 }
 void base::Set_state (String value)
 {
@@ -424,16 +392,6 @@ String base::Get_state ( void )
 {
 	return this->state;
 }
-void base::Set_duration (String value)
-{
-	this->duration = value;
-	this->Replace("duration", this->duration);
-}
-
-String base::Get_duration ( void )
-{
-	return this->duration;
-}
 void base::Set_flap (String value)
 {
 	this->flap = value;
@@ -444,15 +402,45 @@ String base::Get_flap ( void )
 {
 	return this->flap;
 }
-void base::Set_calibrated (String value)
+void base::Set_temp (String value)
 {
-	this->calibrated = value;
-	this->Replace("calibrated", this->calibrated);
+	this->temp = value;
+	this->Replace("temp", this->temp);
 }
 
-String base::Get_calibrated ( void )
+String base::Get_temp ( void )
 {
-	return this->calibrated;
+	return this->temp;
+}
+void base::Set_duration (String value)
+{
+	this->duration = value;
+	this->Replace("duration", this->duration);
+}
+
+String base::Get_duration ( void )
+{
+	return this->duration;
+}
+void base::Set_version (String value)
+{
+	this->version = value;
+	this->Replace("version", this->version);
+}
+
+String base::Get_version ( void )
+{
+	return this->version;
+}
+void base::Set_program (String value)
+{
+	this->program = value;
+	this->Replace("program", this->program);
+}
+
+String base::Get_program ( void )
+{
+	return this->program;
 }
 void base::Render( void )
 {

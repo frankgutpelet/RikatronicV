@@ -1,5 +1,5 @@
-﻿#include <Arduino.h>
 #include "tempSensor.hpp"
+#include "Arduino.h"
 
 #define PT1000_0K_OFFSET (1000)
 #define PT1000_CURVE_PITCH ((double) 0.28)

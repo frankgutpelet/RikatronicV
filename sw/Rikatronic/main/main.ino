@@ -9,7 +9,7 @@
 const char* ssid = "WMOSKITO";
 const char* password = ".ubX54bVSt#vxW11m.";
 const char* myhostname = "RikatronicV";
-const char* curVersion = "2.2.0"; //GET Befehl für LMAIR
+const char* curVersion = "2.3.0"; //höhere Temperatur nach Ofenrohrreinigung
 const char* PushMessage_DeviceId = "vCDFC7D7572A7731";
 
 ESP8266WebServer server(80);

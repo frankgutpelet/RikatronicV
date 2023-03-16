@@ -215,7 +215,7 @@ body {\n\
 <table  class=\"auto-style2\" style=\"width: 100%\">\n\
 	<tr>\n\
 		<div class=\"slidecontainer\">\n\
-			<input id=\"slider\" type=\"range\" min=\"1\" max=\"100\" value={{ flap }} class=\"slider\" id=\"flap\" onchange=\"sliderChange()\">\n\
+			<input id=\"slider\" type=\"range\" min=\"0\" max=\"100\" value={{ flap }} class=\"slider\" id=\"flap\" onchange=\"sliderChange()\">\n\
 		</div>\n\
 	</tr>\n\
 </table>\n\
@@ -341,12 +341,12 @@ void base::Submit_Callback(void)
 	}
 	else
 	{
-		this->calibrated = obj["calibrated"].as < String > ();
 		this->beep = obj["beep"].as < String > ();
-		this->state = obj["state"].as < String > ();
-		this->flap = obj["flap"].as < String > ();
 		this->temp = obj["temp"].as < String > ();
 		this->duration = obj["duration"].as < String > ();
+		this->flap = obj["flap"].as < String > ();
+		this->state = obj["state"].as < String > ();
+		this->calibrated = obj["calibrated"].as < String > ();
 		this->version = obj["version"].as < String > ();
 		this->program = obj["program"].as < String > ();
 
@@ -362,16 +362,6 @@ void base::SetCallback_submit (void (*callback)(void))
 	this->submit_UserCallback = callback;
 }
 
-void base::Set_calibrated (String value)
-{
-	this->calibrated = value;
-	this->Replace("calibrated", this->calibrated);
-}
-
-String base::Get_calibrated ( void )
-{
-	return this->calibrated;
-}
 void base::Set_beep (String value)
 {
 	this->beep = value;
@@ -381,26 +371,6 @@ void base::Set_beep (String value)
 String base::Get_beep ( void )
 {
 	return this->beep;
-}
-void base::Set_state (String value)
-{
-	this->state = value;
-	this->Replace("state", this->state);
-}
-
-String base::Get_state ( void )
-{
-	return this->state;
-}
-void base::Set_flap (String value)
-{
-	this->flap = value;
-	this->Replace("flap", this->flap);
-}
-
-String base::Get_flap ( void )
-{
-	return this->flap;
 }
 void base::Set_temp (String value)
 {
@@ -421,6 +391,36 @@ void base::Set_duration (String value)
 String base::Get_duration ( void )
 {
 	return this->duration;
+}
+void base::Set_flap (String value)
+{
+	this->flap = value;
+	this->Replace("flap", this->flap);
+}
+
+String base::Get_flap ( void )
+{
+	return this->flap;
+}
+void base::Set_state (String value)
+{
+	this->state = value;
+	this->Replace("state", this->state);
+}
+
+String base::Get_state ( void )
+{
+	return this->state;
+}
+void base::Set_calibrated (String value)
+{
+	this->calibrated = value;
+	this->Replace("calibrated", this->calibrated);
+}
+
+String base::Get_calibrated ( void )
+{
+	return this->calibrated;
 }
 void base::Set_version (String value)
 {

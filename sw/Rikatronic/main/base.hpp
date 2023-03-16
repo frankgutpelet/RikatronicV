@@ -8,18 +8,18 @@ class base
 
 		void Render (void);
 		void SetCallback_submit (void (*callback)(void));
-		void Set_calibrated (String value);
-		String Get_calibrated ();
 		void Set_beep (String value);
 		String Get_beep ();
-		void Set_state (String value);
-		String Get_state ();
-		void Set_flap (String value);
-		String Get_flap ();
 		void Set_temp (String value);
 		String Get_temp ();
 		void Set_duration (String value);
 		String Get_duration ();
+		void Set_flap (String value);
+		String Get_flap ();
+		void Set_state (String value);
+		String Get_state ();
+		void Set_calibrated (String value);
+		String Get_calibrated ();
 		void Set_version (String value);
 		String Get_version ();
 		void Set_program (String value);
@@ -31,12 +31,12 @@ class base
 		void Replace(String var, String val);
 		ESP8266WebServer* server;
 
-		String calibrated;
 		String beep;
-		String state;
-		String flap;
 		String temp;
 		String duration;
+		String flap;
+		String state;
+		String calibrated;
 		String version;
 		String program;
 };

@@ -4,8 +4,8 @@
 //#define PWM_FACTOR (((double)1023 * 4) / (100 * 21))
 //#define PWM_OFFSET 49
 // Frank Ofen
-#define PWM_FACTOR (((double)1023 * 3) / (100 * 30 ))
-#define PWM_OFFSET 39
+#define PWM_FACTOR (((double)1023) / (100 * 24 ))
+#define PWM_OFFSET 0
 // HW version 1
 //#define PWM_FACTOR (((double)1023) / (100 * 24))
 //#define PWM_OFFSET 0
@@ -23,6 +23,7 @@ Flap::Flap(int pwmPin, int relaisPin)
 void Flap::SetPosition(int percentage)
 {
   this->position = percentage;
+  this->logger->Debug("Set Position to " + String(percentage));
   analogWrite(this->pwmPin, ((percentage * PWM_FACTOR)+PWM_OFFSET));
 }
 

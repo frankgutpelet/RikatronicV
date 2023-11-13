@@ -9,7 +9,7 @@
 const char* ssid = "WMOSKITO";
 const char* password = ".ubX54bVSt#vxW11m.";
 const char* myhostname = "RikatronicVI";
-const char* curVersion = "3.0.0"; //updateValues
+const char* curVersion = "3.0.1"; //updateValues
 const char* PushMessage_DeviceId = "vCDFC7D7572A7731";
 
 ESP8266WebServer server(80);

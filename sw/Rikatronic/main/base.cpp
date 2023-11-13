@@ -214,7 +214,7 @@ body {\n\
 <table  class=\"auto-style2\" style=\"width: 100%\">\n\
 	<tr>\n\
 		<div class=\"slidecontainer\">\n\
-			<input id=\"slider\" type=\"range\" min=\"0\" max=\"100\" value={{ flap }} class=\"slider\" id=\"flap\" onchange=\"sliderChange()\">\n\
+			<input id=\"slider\" type=\"range\" min=\"0\" max=\"100\" value=0 class=\"slider\" onchange=\"sliderChange()\">\n\
 		</div>\n\
 	</tr>\n\
 </table>\n\
@@ -389,13 +389,13 @@ void base::Submit_Callback(void)
 	else
 	{
 		this->state = obj["state"].as < String > ();
-		this->beep = obj["beep"].as < String > ();
-		this->duration = obj["duration"].as < String > ();
 		this->program = obj["program"].as < String > ();
+		this->beep = obj["beep"].as < String > ();
 		this->slider = obj["slider"].as < String > ();
-		this->flap = obj["flap"].as < String > ();
+		this->duration = obj["duration"].as < String > ();
 		this->temp = obj["temp"].as < String > ();
 		this->version = obj["version"].as < String > ();
+		this->flap = obj["flap"].as < String > ();
 
 	}
 	if (NULL != this->submit_UserCallback)
@@ -418,24 +418,6 @@ String base::Get_state ( void )
 {
 	return this->state;
 }
-void base::Set_beep (String value)
-{
-	this->beep = value;
-}
-
-String base::Get_beep ( void )
-{
-	return this->beep;
-}
-void base::Set_duration (String value)
-{
-	this->duration = value;
-}
-
-String base::Get_duration ( void )
-{
-	return this->duration;
-}
 void base::Set_program (String value)
 {
 	this->program = value;
@@ -444,6 +426,15 @@ void base::Set_program (String value)
 String base::Get_program ( void )
 {
 	return this->program;
+}
+void base::Set_beep (String value)
+{
+	this->beep = value;
+}
+
+String base::Get_beep ( void )
+{
+	return this->beep;
 }
 void base::Set_slider (String value)
 {
@@ -454,14 +445,14 @@ String base::Get_slider ( void )
 {
 	return this->slider;
 }
-void base::Set_flap (String value)
+void base::Set_duration (String value)
 {
-	this->flap = value;
+	this->duration = value;
 }
 
-String base::Get_flap ( void )
+String base::Get_duration ( void )
 {
-	return this->flap;
+	return this->duration;
 }
 void base::Set_temp (String value)
 {
@@ -481,12 +472,21 @@ String base::Get_version ( void )
 {
 	return this->version;
 }
+void base::Set_flap (String value)
+{
+	this->flap = value;
+}
+
+String base::Get_flap ( void )
+{
+	return this->flap;
+}
 void base::Render( void )
 {
 	this->server->send( 200, base_text);
 }
 void base::GetAjaxValues( void )
 {
-	String message = "state:" + this->state + ";beep:" + this->beep + ";duration:" + this->duration + ";program:" + this->program + ";slider:" + this->slider + ";flap:" + this->flap + ";temp:" + this->temp + ";version:" + this->version;
+	String message = "state:" + this->state + ";program:" + this->program + ";beep:" + this->beep + ";slider:" + this->slider + ";duration:" + this->duration + ";temp:" + this->temp + ";version:" + this->version + ";flap:" + this->flap;
 	this->server->send(200, "text/plain", message);
 }

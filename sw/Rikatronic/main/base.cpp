@@ -333,7 +333,8 @@ void base::Submit_Callback(void)
 	
 	if (this->server->hasArg("REFILL"))
 	{
-		this->program = REFILL;
+		this->program = REFIL
+	;
 	}
 	else
 	{

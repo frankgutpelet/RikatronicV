@@ -2,7 +2,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
-	<link rel="stylesheet" style="text/css" href="/style.css">
 <meta content="de" http-equiv="Content-Language" />
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 <title>Rikatronic V</title>
@@ -147,7 +146,7 @@ body {
 <table class="auto-style3" style="width: 100%">
 	<tr>
 		<td class="auto-style2" style="width: 484px"><strong>Ofentemperatur</strong></td>
-		<td class="auto-style2"><strong id="temp"></strong></td>
+		<td class="auto-style2"><strong id="temp"></strong><strong>°C</strong></td>
 	</tr>
 	<tr>
 		<td class="auto-style2" style="width: 484px"><strong>Programm</strong></td>
@@ -159,7 +158,7 @@ body {
 	</tr>
 	<tr>
 		<td class="auto-style2" style="width: 484px"><strong>Klappe</strong></td>
-		<td id="flapColumn" class="auto-style2"><strong id="flap"></strong></td>
+		<td id="flapColumn" class="auto-style2"><strong id="flap"></strong><strong>%</strong></td>
 	</tr>
 	<tr>
 		<td class="auto-style2" style="width: 484px"><strong>Modus</strong></td>
@@ -237,53 +236,62 @@ body {
 </html>
 <script>
 
-	var values = {
-		"state" : "0",
-		"flap" : "0",
-		"temp" : "0",
-		"program" : "0",
-		"duration" : "0",
-		"calibrated" : "0",
-		"version" : "0",
-		"beep" : "0"}
 
-	document.getElementById("version").innerHTML = "Version: " + values.version
-		
-	document.getElementById("flap").innerHTML = values.flap + "%"
+	var values = {
+		"state" : "dynamic",
+		"flap" : "dynamic",
+		"slider" : "dynamic",
+		"temp" : "dynamic",
+		"program" : "dynamic",
+		"duration" : "dynamic",
+		"version" : "dynamic",
+		"beep" : "dynamic"}
+
+	var editMode = false;
+
+	document.getElementById("version").innerHTML = values.version
+	document.getElementById("flap").innerHTML = values.flap
 	document.getElementById("slider").value = values.flap
-	document.getElementById("temp").innerHTML = values.temp + "°C"
+	document.getElementById("temp").innerHTML = values.temp
 	document.getElementById("state").innerHTML = values.state
 	document.getElementById("duration").innerHTML = values.duration
 	document.getElementById("program").innerHTML = values.program
 	document.getElementById("beep").innerHTML = values.beep
 	document.getElementById("submitBtn").value = JSON.stringify(values)
 
+	interval = setInterval(updateValues, 1000)
+
 	function refill()
 	{
+		editMode = true
 		values.program = "REFILL"
 		document.getElementById("state").innerHTML = values.state
 		document.getElementById("submitBtn").value = JSON.stringify(values)
 	}
 	function power()
 	{
+		editMode = true
 		values.state = "POWER"
 		document.getElementById("state").innerHTML = values.state
 		document.getElementById("submitBtn").value = JSON.stringify(values)
 	}
 	function eco()
 	{
+		editMode = true
 		values.state = "ECO"
 		document.getElementById("state").innerHTML = values.state
 		document.getElementById("submitBtn").value = JSON.stringify(values)
 	}
 	function manual()
 	{
+		editMode = true
 		values.state = "MANUAL"
 		document.getElementById("state").innerHTML = values.state
 		document.getElementById("submitBtn").value = JSON.stringify(values)
 	}
 	function beep()
 	{
+		editMode = true
 		if ("ON" == values.beep)
 		{
 			values.beep = "OFF"
@@ -297,6 +305,7 @@ body {
 	}
 	function testBeep()
 	{
+		editMode = true
 		values.beep = "TEST"
 		document.getElementById("beep").innerHTML = values.beep
 		document.getElementById("submitBtn").value = JSON.stringify(values)
@@ -305,14 +314,50 @@ body {
 	{
 		if ("MANUAL" == values.state)
 		{
+			editMode = true
 			values.flap = document.getElementById("slider").value
-			document.getElementById("flap").innerHTML = values.flap + "% (übernehmen)"
+			document.getElementById("flap").innerHTML = values.flap
 			document.getElementById("submitBtn").value = JSON.stringify(values)
 		}
 		else
 		{
 			document.getElementById("slider").value = values.flap
 		}
+	}
+
+	function updateValues()
+	{
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function(){
+			if (editMode)
+			{
+				return;
+			}
+			pairs = this.responseText.split(";");
+			for(let i = 0; i < pairs.length; i++)
+			{
+				pair = pairs[i].split(':');
+				values[pair[0]] = pair[1];
+				toChange = document.getElementById(pair[0])
+				if (null == toChange)
+				{
+					console.warn("Element " + pair[0] + "not found");
+					continue
+				}
+				if (document.getElementById(pair[0]).type == "range")
+				{
+					document.getElementById(pair[0]).value = pair[1]
+				}
+				else
+				{
+
+					document.getElementById(pair[0]).innerHTML = pair[1]
+
+				}
+			}
+		}
+		xhttp.open("GET", "getValues", true);
+		xhttp.send();
 	}
 
 </script>

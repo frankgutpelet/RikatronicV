@@ -8,13 +8,13 @@
 
 const char* ssid = "WMOSKITO";
 const char* password = ".ubX54bVSt#vxW11m.";
-const char* myhostname = "RikatronicV";
-const char* curVersion = "2.3.0"; //höhere Temperatur nach Ofenrohrreinigung
+const char* myhostname = "RikatronicVI";
+const char* curVersion = "3.0.0"; //updateValues
 const char* PushMessage_DeviceId = "vCDFC7D7572A7731";
 
 ESP8266WebServer server(80);
-FlameRegulator flameRegulator;
 base indexPage(&server);
+FlameRegulator flameRegulator(&indexPage);
 Button RefillButton;
 
 void handleRoot() 
@@ -84,7 +84,8 @@ void handleNotFound() {
   server.send(404, "text/plain", message);
 }
 
-void setup(void) {
+void setup(void) 
+{
 
   /* set all values for webpage */
   indexPage.Set_program("ECO");
@@ -100,7 +101,8 @@ void setup(void) {
   Serial.println("");
 
   // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED) 
+  {
     delay(500);
     Serial.print(".");
   }
@@ -110,7 +112,8 @@ void setup(void) {
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
  
-  if (MDNS.begin("esp8266")) {
+  if (MDNS.begin("esp8266")) 
+  {
     Serial.println("MDNS responder started");
   }
 
@@ -118,24 +121,6 @@ void setup(void) {
     server.send(200, "text/plain", "this works as well");
   indexPage.SetCallback_submit(callback); 
   
-
-  server.on("/gif", []() {
-    static const uint8_t gif[] PROGMEM = {
-      0x47, 0x49, 0x46, 0x38, 0x37, 0x61, 0x10, 0x00, 0x10, 0x00, 0x80, 0x01,
-      0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x2c, 0x00, 0x00, 0x00, 0x00,
-      0x10, 0x00, 0x10, 0x00, 0x00, 0x02, 0x19, 0x8c, 0x8f, 0xa9, 0xcb, 0x9d,
-      0x00, 0x5f, 0x74, 0xb4, 0x56, 0xb0, 0xb0, 0xd2, 0xf2, 0x35, 0x1e, 0x4c,
-      0x0c, 0x24, 0x5a, 0xe6, 0x89, 0xa6, 0x4d, 0x01, 0x00, 0x3b
-    };
-    char gif_colored[sizeof(gif)];
-    memcpy_P(gif_colored, gif, sizeof(gif));
-    // Set the background to a random set of colors
-    gif_colored[16] = millis() % 256;
-    gif_colored[17] = millis() % 256;
-    gif_colored[18] = millis() % 256;
-    server.send(200, "image/gif", gif_colored, sizeof(gif_colored));
-  });
-
   server.onNotFound(handleNotFound);
 
   server.begin();

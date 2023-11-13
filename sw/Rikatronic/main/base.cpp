@@ -1,12 +1,11 @@
 #include "base.hpp"
 #include <ArduinoJson.h>
 
-StaticJsonDocument < 300 > doc;
-char base_text[] = "﻿<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n\
+StaticJsonDocument < 600 > base_doc;
+const char base_text[] = "﻿<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n\
 <html xmlns=\"http://www.w3.org/1999/xhtml\">\n\
 \n\
 <head>\n\
-	<link rel=\"stylesheet\" style=\"text/css\" href=\"/style.css\">\n\
 <meta content=\"de\" http-equiv=\"Content-Language\" />\n\
 <meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />\n\
 <title>Rikatronic V</title>\n\
@@ -151,7 +150,7 @@ body {\n\
 <table class=\"auto-style3\" style=\"width: 100%\">\n\
 	<tr>\n\
 		<td class=\"auto-style2\" style=\"width: 484px\"><strong>Ofentemperatur</strong></td>\n\
-		<td class=\"auto-style2\"><strong id=\"temp\"></strong></td>\n\
+		<td class=\"auto-style2\"><strong id=\"temp\"></strong><strong>°C</strong></td>\n\
 	</tr>\n\
 	<tr>\n\
 		<td class=\"auto-style2\" style=\"width: 484px\"><strong>Programm</strong></td>\n\
@@ -163,7 +162,7 @@ body {\n\
 	</tr>\n\
 	<tr>\n\
 		<td class=\"auto-style2\" style=\"width: 484px\"><strong>Klappe</strong></td>\n\
-		<td id=\"flapColumn\" class=\"auto-style2\"><strong id=\"flap\"></strong></td>\n\
+		<td id=\"flapColumn\" class=\"auto-style2\"><strong id=\"flap\"></strong><strong>%</strong></td>\n\
 	</tr>\n\
 	<tr>\n\
 		<td class=\"auto-style2\" style=\"width: 484px\"><strong>Modus</strong></td>\n\
@@ -241,53 +240,62 @@ body {\n\
 </html>\n\
 <script>\n\
 \n\
-	var values = {\n\
-		\"state\" : \"0\",              \n\
-		\"flap\" : \"0\",               \n\
-		\"temp\" : \"0\",               \n\
-		\"program\" : \"0\",            \n\
-		\"duration\" : \"0\",           \n\
-		\"calibrated\" : \"0\",         \n\
-		\"version\" : \"0\",            \n\
-		\"beep\" : \"0\"}               \n\
 \n\
-	document.getElementById(\"version\").innerHTML = \"Version: \" + values.version\n\
-		\n\
-	document.getElementById(\"flap\").innerHTML = values.flap + \"%\"\n\
+	var values = {\n\
+		\"state\" : \"dynamic\",        \n\
+		\"flap\" : \"dynamic\",         \n\
+		\"slider\" : \"dynamic\",       \n\
+		\"temp\" : \"dynamic\",         \n\
+		\"program\" : \"dynamic\",      \n\
+		\"duration\" : \"dynamic\",     \n\
+		\"version\" : \"dynamic\",      \n\
+		\"beep\" : \"dynamic\"}         \n\
+\n\
+	var editMode = false;\n\
+\n\
+	document.getElementById(\"version\").innerHTML = values.version\n\
+	document.getElementById(\"flap\").innerHTML = values.flap\n\
 	document.getElementById(\"slider\").value = values.flap\n\
-	document.getElementById(\"temp\").innerHTML = values.temp + \"°C\"\n\
+	document.getElementById(\"temp\").innerHTML = values.temp\n\
 	document.getElementById(\"state\").innerHTML = values.state\n\
 	document.getElementById(\"duration\").innerHTML = values.duration\n\
 	document.getElementById(\"program\").innerHTML = values.program\n\
 	document.getElementById(\"beep\").innerHTML = values.beep\n\
 	document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
 \n\
+	interval = setInterval(updateValues, 1000)\n\
+\n\
 	function refill()\n\
 	{\n\
+		editMode = true\n\
 		values.program = \"REFILL\"\n\
 		document.getElementById(\"state\").innerHTML = values.state\n\
 		document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
 	}\n\
 	function power()\n\
 	{\n\
+		editMode = true\n\
 		values.state = \"POWER\"\n\
 		document.getElementById(\"state\").innerHTML = values.state\n\
 		document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
 	}\n\
 	function eco()\n\
 	{\n\
+		editMode = true\n\
 		values.state = \"ECO\"\n\
 		document.getElementById(\"state\").innerHTML = values.state\n\
 		document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
 	}\n\
 	function manual()\n\
 	{\n\
+		editMode = true\n\
 		values.state = \"MANUAL\"\n\
 		document.getElementById(\"state\").innerHTML = values.state\n\
 		document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
 	}\n\
 	function beep()\n\
 	{\n\
+		editMode = true\n\
 		if (\"ON\" == values.beep)\n\
 		{\n\
 			values.beep = \"OFF\"\n\
@@ -301,6 +309,7 @@ body {\n\
 	}\n\
 	function testBeep()\n\
 	{\n\
+		editMode = true\n\
 		values.beep = \"TEST\"\n\
 		document.getElementById(\"beep\").innerHTML = values.beep\n\
 		document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
@@ -309,8 +318,9 @@ body {\n\
 	{\n\
 		if (\"MANUAL\" == values.state)\n\
 		{\n\
+			editMode = true\n\
 			values.flap = document.getElementById(\"slider\").value\n\
-			document.getElementById(\"flap\").innerHTML = values.flap + \"% (übernehmen)\"\n\
+			document.getElementById(\"flap\").innerHTML = values.flap\n\
 			document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
 		}\n\
 		else\n\
@@ -319,20 +329,57 @@ body {\n\
 		}\n\
 	}\n\
 \n\
-</script>";
+	function updateValues()\n\
+	{\n\
+		var xhttp = new XMLHttpRequest();\n\
+		xhttp.onreadystatechange = function(){\n\
+			if (editMode)\n\
+			{\n\
+				return;\n\
+			}\n\
+			pairs = this.responseText.split(\";\");\n\
+			for(let i = 0; i < pairs.length; i++)\n\
+			{\n\
+				pair = pairs[i].split(':');\n\
+				values[pair[0]] = pair[1];\n\
+				toChange = document.getElementById(pair[0])\n\
+				if (null == toChange)\n\
+				{\n\
+					console.warn(\"Element \" + pair[0] + \"not found\");\n\
+					continue\n\
+				}\n\
+				if (document.getElementById(pair[0]).type == \"range\")\n\
+				{\n\
+					document.getElementById(pair[0]).value = pair[1]\n\
+				}\n\
+				else\n\
+				{\n\
+\n\
+					document.getElementById(pair[0]).innerHTML = pair[1]\n\
+\n\
+				}\n\
+			}\n\
+		}\n\
+		xhttp.open(\"GET\", \"getValues\", true);\n\
+		xhttp.send();\n\
+	}\n\
+\n\
+</script>\n\
+";
 
 base::base(ESP8266WebServer* server)
 {
 	this->server = server;
 	this->submit_UserCallback = (void(*)()) NULL;
 	this->server->on("/submit", std::bind( & base::Submit_Callback, this));
+	this->server->on("/getValues", std::bind( & base::GetAjaxValues, this));
 }
 void base::Submit_Callback(void)
 {
 	String jsonstring = this->server->arg("action");
-	DeserializationError error = deserializeJson(doc, jsonstring);
+	DeserializationError error = deserializeJson(base_doc, jsonstring);
 	Serial.println(jsonstring);
-	JsonObject obj = doc.as < JsonObject > ();
+	JsonObject obj = base_doc.as < JsonObject > ();
 
 	if (error)
 	{
@@ -341,14 +388,14 @@ void base::Submit_Callback(void)
 	}
 	else
 	{
-		this->beep = obj["beep"].as < String > ();
-		this->temp = obj["temp"].as < String > ();
-		this->duration = obj["duration"].as < String > ();
-		this->flap = obj["flap"].as < String > ();
 		this->state = obj["state"].as < String > ();
-		this->calibrated = obj["calibrated"].as < String > ();
-		this->version = obj["version"].as < String > ();
+		this->beep = obj["beep"].as < String > ();
+		this->duration = obj["duration"].as < String > ();
 		this->program = obj["program"].as < String > ();
+		this->slider = obj["slider"].as < String > ();
+		this->flap = obj["flap"].as < String > ();
+		this->temp = obj["temp"].as < String > ();
+		this->version = obj["version"].as < String > ();
 
 	}
 	if (NULL != this->submit_UserCallback)
@@ -362,144 +409,84 @@ void base::SetCallback_submit (void (*callback)(void))
 	this->submit_UserCallback = callback;
 }
 
-void base::Set_beep (String value)
-{
-	this->beep = value;
-	this->Replace("beep", this->beep);
-}
-
-String base::Get_beep ( void )
-{
-	return this->beep;
-}
-void base::Set_temp (String value)
-{
-	this->temp = value;
-	this->Replace("temp", this->temp);
-}
-
-String base::Get_temp ( void )
-{
-	return this->temp;
-}
-void base::Set_duration (String value)
-{
-	this->duration = value;
-	this->Replace("duration", this->duration);
-}
-
-String base::Get_duration ( void )
-{
-	return this->duration;
-}
-void base::Set_flap (String value)
-{
-	this->flap = value;
-	this->Replace("flap", this->flap);
-}
-
-String base::Get_flap ( void )
-{
-	return this->flap;
-}
 void base::Set_state (String value)
 {
 	this->state = value;
-	this->Replace("state", this->state);
 }
 
 String base::Get_state ( void )
 {
 	return this->state;
 }
-void base::Set_calibrated (String value)
+void base::Set_beep (String value)
 {
-	this->calibrated = value;
-	this->Replace("calibrated", this->calibrated);
+	this->beep = value;
 }
 
-String base::Get_calibrated ( void )
+String base::Get_beep ( void )
 {
-	return this->calibrated;
+	return this->beep;
 }
-void base::Set_version (String value)
+void base::Set_duration (String value)
 {
-	this->version = value;
-	this->Replace("version", this->version);
+	this->duration = value;
 }
 
-String base::Get_version ( void )
+String base::Get_duration ( void )
 {
-	return this->version;
+	return this->duration;
 }
 void base::Set_program (String value)
 {
 	this->program = value;
-	this->Replace("program", this->program);
 }
 
 String base::Get_program ( void )
 {
 	return this->program;
 }
+void base::Set_slider (String value)
+{
+	this->slider = value;
+}
+
+String base::Get_slider ( void )
+{
+	return this->slider;
+}
+void base::Set_flap (String value)
+{
+	this->flap = value;
+}
+
+String base::Get_flap ( void )
+{
+	return this->flap;
+}
+void base::Set_temp (String value)
+{
+	this->temp = value;
+}
+
+String base::Get_temp ( void )
+{
+	return this->temp;
+}
+void base::Set_version (String value)
+{
+	this->version = value;
+}
+
+String base::Get_version ( void )
+{
+	return this->version;
+}
 void base::Render( void )
 {
-	this->server->send( 200, base_text );
+	this->server->send( 200, base_text);
 }
-void base::Replace(String var, String val)
+void base::GetAjaxValues( void )
 {
-	int varLength = var.length() + 1;
-	int valLength = val.length() + 1;
-	char varName[varLength];
-	char value[valLength];
-	char tmpVarName[varLength];
-	if (10 < valLength)
-	{
-		valLength = 10;
-	}
-	var.toCharArray(varName, varLength);
-	val.toCharArray(value, valLength);
-#ifdef DEBUG
-	 Serial.println("Search for " + var + ");
-#endif
-	for (int i=0; i < sizeof(base_text); i++)
-	{
-		if ('\n' == base_text[i-1])
-		{
-			memcpy(tmpVarName, & base_text[i+3], varLength);
-			tmpVarName[varLength - 1] = '\0';
-			if ((0 == strcmp(varName, tmpVarName)) && ('\"' == base_text[i+2]) && ('\"' == base_text[i+2+varLength]))
-			{
-				/* replace variable and set iterator to end of line */
-				i = this->ReplaceJSVariable((i+7+varLength), varName, value, valLength);
-			}
-		}
-	}
-}
-int base::ReplaceJSVariable(int index, const char * varName, const char * value, int valLength)
-{
-	char lastChar = ' ';
-	int endOfLine = index;
-#ifdef DEBUG
-	Serial.println(String("Found variable: ") + varName + " first char: " + base_text[index]);
-#endif
-
-
-	/*delete value in line */
-	do
-	{
-		if (' ' != base_text[endOfLine])
-		{
-			lastChar = base_text[endOfLine];
-		}
-		base_text[endOfLine] = ' ';
-		endOfLine ++;
-	}while (base_text[endOfLine] != '\n');
-#ifdef DEBUG
-	Serial.println("Value deleted");
-#endif
-	memcpy( &base_text[index], value, (valLength - 1));
-	base_text[(index + valLength - 1)] = '\"';
-	base_text[(index + valLength)] = lastChar;
-	return endOfLine;
+	String message = "state:" + this->state + ";beep:" + this->beep + ";duration:" + this->duration + ";program:" + this->program + ";slider:" + this->slider + ";flap:" + this->flap + ";temp:" + this->temp + ";version:" + this->version;
+	this->server->send(200, "text/plain", message);
 }

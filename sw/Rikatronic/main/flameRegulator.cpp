@@ -49,8 +49,8 @@ FlameRegulator::programStateConfig_t FlameRegulator::programStateConfig[FLAP_PRO
     {FLAP_PROGRAM_STATE_HEAT_UP_END,    FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_UP_4,       100,                    90,                 80,                 60,  false },
     {FLAP_PROGRAM_STATE_HEAT_BURN_IDLE, FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     150,                    140,                75,                 20,  true },
     {FLAP_PROGRAM_STATE_HEAT_BURN,      FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   FLAP_PROGRAM_STATE_HEAT_BURN_IDLE,  160,                    140,                80,                 30,  false },
-    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  FLAP_PROGRAM_STATE_HEAT_BURN,       175,                    150,                87,                 30,  false },
-    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT2, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   250,                    170,                90,                 30,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  FLAP_PROGRAM_STATE_HEAT_BURN,       205,                    150,                85,                 30,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT2, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   250,                    200,                90,                 30,  false },
     {FLAP_PROGRAM_STATE_HEAT_BURN_HOT3, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  1000,                   200,                92,                 30,  false },
     {FLAP_PROGRAM_STATE_HEAT_OFF,       FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        50,                      0,                  0,                 10,  false },
     {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_BURN,   FLAP_PROGRAM_STATE_HEAT_OFF,            90,                     40,                 60,                120,  true }
@@ -61,19 +61,19 @@ FlameRegulator::programStateConfig_t FlameRegulator::programStateConfigEco[FLAP_
 {
     {FLAP_PROGRAM_STATE_NONE,           FLAP_PROGRAM_STATE_NONE,            FLAP_PROGRAM_STATE_NONE,            0,                      0,                  0,                  0,   false },
     {FLAP_PROGRAM_STATE_REFILL,         FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_OFF,        0,                      0,                  0,                  0,   false },
-    {FLAP_PROGRAM_STATE_HEAT_UP_START,  FLAP_PROGRAM_STATE_HEAT_UP_1,       FLAP_PROGRAM_STATE_HEAT_OFF,        50,                     40,                 20,                 60,  false },
+    {FLAP_PROGRAM_STATE_HEAT_UP_START,  FLAP_PROGRAM_STATE_HEAT_UP_1,       FLAP_PROGRAM_STATE_HEAT_OFF,        50,                     30,                 20,                 60,  false },
     {FLAP_PROGRAM_STATE_HEAT_UP_1,      FLAP_PROGRAM_STATE_HEAT_UP_2,       FLAP_PROGRAM_STATE_HEAT_UP_START,   60,                     50,                 40,                 60,  false },
     {FLAP_PROGRAM_STATE_HEAT_UP_2,      FLAP_PROGRAM_STATE_HEAT_UP_3,       FLAP_PROGRAM_STATE_HEAT_UP_1,       70,                     60,                 60,                 60,  false },
     {FLAP_PROGRAM_STATE_HEAT_UP_3,      FLAP_PROGRAM_STATE_HEAT_UP_4,       FLAP_PROGRAM_STATE_HEAT_UP_2,       80,                     70,                 70,                 60,  false },
     {FLAP_PROGRAM_STATE_HEAT_UP_4,      FLAP_PROGRAM_STATE_HEAT_UP_END,     FLAP_PROGRAM_STATE_HEAT_UP_3,       90,                     80,                 75,                 60,  false },
     {FLAP_PROGRAM_STATE_HEAT_UP_END,    FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_UP_4,       100,                    90,                 80,                 60,  false },
-    {FLAP_PROGRAM_STATE_HEAT_BURN_IDLE, FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     130,                    95,                 75,                 20,  false },
-    {FLAP_PROGRAM_STATE_HEAT_BURN,      FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   FLAP_PROGRAM_STATE_HEAT_BURN_IDLE,  140,                    115,                85,                 30,  false },
-    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  FLAP_PROGRAM_STATE_HEAT_BURN,       155,                    130,                88,                 30,  false },
-    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT2, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   170,                    150,                90,                 30,  false },
-    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT3, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  1000,                   160,                92,                 30,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_IDLE, FLAP_PROGRAM_STATE_HEAT_BURN,       FLAP_PROGRAM_STATE_HEAT_RESCUE,     150,                    140,                75,                 20,  true },
+    {FLAP_PROGRAM_STATE_HEAT_BURN,      FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   FLAP_PROGRAM_STATE_HEAT_BURN_IDLE,  160,                    140,                80,                 30,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  FLAP_PROGRAM_STATE_HEAT_BURN,       175,                    150,                87,                 30,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT2, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT,   250,                    170,                90,                 30,  false },
+    {FLAP_PROGRAM_STATE_HEAT_BURN_HOT3, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  1000,                   200,                92,                 30,  false },
     {FLAP_PROGRAM_STATE_HEAT_OFF,       FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        50,                      0,                  0,                 10,  false },
-    {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_BURN,   FLAP_PROGRAM_STATE_HEAT_OFF,            90,                     40,                 85,                120,  true }
+    {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_BURN,   FLAP_PROGRAM_STATE_HEAT_OFF,            90,                     40,                 60,                120,  true }
 };
 
 
@@ -83,7 +83,7 @@ void timerCallback(void* pArg);
 
 //################################### member function #################################
 
-FlameRegulator::FlameRegulator():
+FlameRegulator::FlameRegulator(base* indexPage):
 flap{Flap(PWM_OUTPUT, RELAIS_OUTPUT)},
 tempSensor{TempSensor(ANALOG_INPUT)}
 {
@@ -93,6 +93,7 @@ tempSensor{TempSensor(ANALOG_INPUT)}
     this->RecogniceInitialState();
     this->mute = true;
     this->secondsToUnmute = -1;
+    this->indexPage = indexPage;
     pinMode(BEEP_PIN, OUTPUT);
     
 	// initialize tinmer
@@ -252,6 +253,13 @@ void FlameRegulator::ProgramStateMachine (void)
     }
     this->flap.SetPosition(currentConfig->currentFlapPosition);
 
+    this->indexPage->Set_flap(String(this->flap.GetPosition()));
+    this->indexPage->Set_slider(String(this->flap.GetPosition()));
+    this->indexPage->Set_temp(String(this->tempSensor.GetTemp()));
+    this->indexPage->Set_program(this->GetProgramStateStr());
+    this->indexPage->Set_state(this->GetFlapRegulationModeStr());
+    this->action_timeSec = 10;    
+
     //check fallback temperature
     if (this->tempSensor.GetTemp() < currentConfig->tempForLastState)
     {
@@ -269,8 +277,6 @@ void FlameRegulator::ProgramStateMachine (void)
         this->action_timeSec = currentConfig->breakTimeSec;
         return;
     }
-
-    this->action_timeSec = 10;    
 }
 
 //###################################   private functions    ##############################

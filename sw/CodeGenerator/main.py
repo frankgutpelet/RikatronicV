@@ -18,20 +18,23 @@ def printClass(side):
 
     header.write("#include <ESP8266WebServer.h>\n")
     header.write("#include <Arduino.h>\n")
+    header.write("#pragma once")
     header.write("\nclass " + side.name + "\n")
     header.write("{\n")
     header.write("\tpublic:\n")
     header.write("\t\t" + side.name + " (ESP8266WebServer* server);\n\n")
     header.write("\t\tvoid Render (void);\n")
+    header.write("\t\tvoid GetAjaxValues (void);\n")
 
     source.write("#include \"" + side.name + ".hpp\"\n")
     source.write("#include <ArduinoJson.h>\n")
     source.write("\n")
-    source.write("StaticJsonDocument < 300 > doc;\n")
+    source.write("StaticJsonDocument < 600 > " + side.name + "_doc;\n")
 
-    source.write("char " + side.name + "_text[] = \"")
+    source.write("const char " + side.name + "_text[] = \"")
     for line in side.text:
         source.write(line.replace('\"', '\\\"').replace("\n", "\\n\\\n"))
+    source.write("</script>\\n\\\n")
     source.write("\";")
     source.write("\n\n")
 
@@ -39,12 +42,13 @@ def printClass(side):
     source.write("\tthis->server = server;\n")
     for cbFunc in side.callbacks:
         source.write("\tthis->" + cbFunc + "_UserCallback = (void(*)()) NULL;\n")
-    source.write("\tthis->server->on(\"/submit\", std::bind( & base::Submit_Callback, this));\n}\n")
-    source.write("void base::Submit_Callback(void)\n{\n")
+    source.write("\tthis->server->on(\"/submit\", std::bind( & " + side.name + "::Submit_Callback, this));\n")
+    source.write("\tthis->server->on(\"/getValues\", std::bind( & " + side.name + "::GetAjaxValues, this));\n}\n")
+    source.write("void " + side.name + "::Submit_Callback(void)\n{\n")
     source.write("\tString jsonstring = this->server->arg(\"action\");\n")
-    source.write("\tDeserializationError error = deserializeJson(doc, jsonstring);\n")
+    source.write("\tDeserializationError error = deserializeJson(" + side.name + "_doc, jsonstring);\n")
     source.write("\tSerial.println(jsonstring);\n")
-    source.write("\tJsonObject obj = doc.as < JsonObject > ();\n\n")
+    source.write("\tJsonObject obj = " + side.name + "_doc.as < JsonObject > ();\n\n")
     source.write("\tif (error)\n\t{\n")
     source.write("\tSerial.print(F(\"deserializeJson() failed: \"));\n")
     source.write("\tSerial.println(error.f_str());\n\t}\n")
@@ -64,58 +68,23 @@ def printClass(side):
     for variable in side.vars:
         header.write("\t\tvoid Set_" + variable + " (String value);\n")
         header.write("\t\tString Get_" + variable + " ();\n")
-        source.write("void " + side.name + "::Set_" + variable + " (String value)\n{\n\tthis->" + variable + " = value;\n\tthis->Replace(\"" + variable + "\", this->" + variable + ");\n}\n\n")
-        source.write("String base::Get_" + variable + " ( void )\n{\n\treturn this->" + variable + ";\n}\n")
+        source.write("void " + side.name + "::Set_" + variable + " (String value)\n{\n\tthis->" + variable + " = value;\n}\n\n")
+        source.write("String " + side.name + "::Get_" + variable + " ( void )\n{\n\treturn this->" + variable + ";\n}\n")
     source.write("void " + side.name + "::Render( void )\n{\n")
-    source.write("\tthis->server->send( 200, " + side.name + "_text );\n")
+    source.write("\tthis->server->send( 200, " + side.name + "_text);\n")
     source.write("}\n")
-
-    source.write("void base::Replace(String var, String val)\n{\n")
-
-    source.write("\tint varLength = var.length() + 1;\n")
-    source.write("\tint valLength = val.length() + 1;\n")
-    source.write("\tchar varName[varLength];\n")
-    source.write("\tchar value[valLength];\n")
-    source.write("\tchar tmpVarName[varLength];\n")
-    source.write("\tif (10 < valLength)\n\t{\n\t\tvalLength = 10;\n\t}\n")
-    source.write("\tvar.toCharArray(varName, varLength);\n")
-    source.write("\tval.toCharArray(value, valLength);\n")
-
-    source.write("#ifdef DEBUG\n\t Serial.println(\"Search for \" + var + \");\n#endif\n")
-    source.write("\tfor (int i=0; i < sizeof(base_text); i++)\n\t{\n")
-    source.write("\t\tif ('\\n' == base_text[i-1])\n\t\t{\n")
-    source.write("\t\t\tmemcpy(tmpVarName, & base_text[i+3], varLength);\n")
-    source.write("\t\t\ttmpVarName[varLength - 1] = '\\0';\n")
-    source.write("\t\t\tif ((0 == strcmp(varName, tmpVarName)) && ('\\\"' == base_text[i+2]) && ('\\\"' == base_text[i+2+varLength]))\n\t\t\t{\n")
-    source.write("\t\t\t\t/* replace variable and set iterator to end of line */\n")
-    source.write("\t\t\t\ti = this->ReplaceJSVariable((i+7+varLength), varName, value, valLength);\n")
-    source.write("\t\t\t}\n\t\t}\n\t}\n}\n")
-
-    source.write("int base::ReplaceJSVariable(int index, const char * varName, const char * value, int valLength)\n{\n")
-    source.write("\tchar lastChar = ' ';\n")
-    source.write("\tint endOfLine = index;\n")
-    source.write("#ifdef DEBUG\n\tSerial.println(String(\"Found variable: \") + varName + \" first char: \" + base_text[index]);\n#endif\n\n")
-    source.write("\n\t/*delete value in line */\n")
-    source.write("\tdo\n\t{\n")
-    source.write("\t\tif (' ' != base_text[endOfLine])\n\t\t{\n")
-    source.write("\t\t\tlastChar = base_text[endOfLine];\n\t\t}\n")
-    source.write("\t\tbase_text[endOfLine] = ' ';\n")
-    source.write("\t\tendOfLine ++;\n")
-    source.write("\t}while (base_text[endOfLine] != \'\\n\');\n")
-
-    source.write("#ifdef DEBUG\n\tSerial.println(\"Value deleted\");\n#endif\n")
-    source.write("\tmemcpy( &base_text[index], value, (valLength - 1));\n")
-    source.write("\tbase_text[(index + valLength - 1)] = \'\\\"\';\n")
-    source.write("\tbase_text[(index + valLength)] = lastChar;\n")
-    source.write("\treturn endOfLine;\n}\n")
-
-
+    source.write("void " + side.name + "::GetAjaxValues( void )\n{\n")
+    line = "\tString message = \""
+    for variable in side.vars:
+        line += variable + ":\" + this->" + variable + " + \";"
+    line = line[:-5]
+    line += ";\n"
+    source.write(line)
+    source.write("\tthis->server->send(200, \"text/plain\", message);\n}\n")
     header.write("\tprivate:\n")
     header.write("\t\tvoid Submit_Callback(void);\n")
-    header.write("\t\tint  ReplaceJSVariable(int index, const char * varName, const char * value, int valLength);\n")
     for cbFunc in side.callbacks:
         header.write("\t\tvoid(*" + cbFunc + "_UserCallback)(void);\n")
-    header.write("\t\tvoid Replace(String var, String val);\n")
     header.write("\t\tESP8266WebServer* server;\n")
     header.write("\n")
     for variable in side.vars:
@@ -129,16 +98,19 @@ def parseHtml(filename):
 
     for line in html:
 
-        match = re.search('\t\t\"([^\"]+)\"\s:\s\"[^\"]+\"', line)
+        match = re.search('\t\t\"([^\"]+)\"\s:\s\"dynamic\"', line)
         if (None != match):
             side.vars.append(match.groups()[0])
             line = line.replace("\n", "")
             linelength = len(line)
-            if (30 <= linelength):
-                raise Exception("increase space foor variables, length > 30")
+            if (50 <= linelength):
+                raise Exception("increase space for variables, length > 30")
             for i in range(0, (30 - linelength)):
                 line += " "
             line += '\n'
+
+        if "</script>" in line:
+            continue
 
         match = re.search("form\s+action=\"([^\"]+)\"\s+method=\"post\"\s+", line)
         if (None != match):

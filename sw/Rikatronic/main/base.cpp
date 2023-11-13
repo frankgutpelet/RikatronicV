@@ -215,7 +215,7 @@ body {\n\
 <table  class=\"auto-style2\" style=\"width: 100%\">\n\
 	<tr>\n\
 		<div class=\"slidecontainer\">\n\
-			<input id=\"slider\" type=\"range\" min=\"1\" max=\"100\" value={{ flap }} class=\"slider\" id=\"flap\" onchange=\"sliderChange()\">\n\
+			<input id=\"slider\" type=\"range\" min=\"0\" max=\"100\" value={{ flap }} class=\"slider\" id=\"flap\" onchange=\"sliderChange()\">\n\
 		</div>\n\
 	</tr>\n\
 </table>\n\
@@ -329,37 +329,27 @@ base::base(ESP8266WebServer* server)
 }
 void base::Submit_Callback(void)
 {
-	String jsonstring;
-	
-	if (this->server->hasArg("REFILL"))
+	String jsonstring = this->server->arg("action");
+	DeserializationError error = deserializeJson(doc, jsonstring);
+	Serial.println(jsonstring);
+	JsonObject obj = doc.as < JsonObject > ();
+
+	if (error)
 	{
-		this->program = REFIL
-	;
+	Serial.print(F("deserializeJson() failed: "));
+	Serial.println(error.f_str());
 	}
 	else
 	{
-		jsonstring = this->server->arg("action");
-		DeserializationError error = deserializeJson(doc, jsonstring);
-		Serial.println(jsonstring);
-		JsonObject obj = doc.as < JsonObject > ();
+		this->beep = obj["beep"].as < String > ();
+		this->temp = obj["temp"].as < String > ();
+		this->duration = obj["duration"].as < String > ();
+		this->flap = obj["flap"].as < String > ();
+		this->state = obj["state"].as < String > ();
+		this->calibrated = obj["calibrated"].as < String > ();
+		this->version = obj["version"].as < String > ();
+		this->program = obj["program"].as < String > ();
 
-		if (error)
-		{
-		Serial.print(F("deserializeJson() failed: "));
-		Serial.println(error.f_str());
-		}
-		else
-		{
-			this->beep = obj["beep"].as < String > ();
-			this->program = obj["program"].as < String > ();
-			this->version = obj["version"].as < String > ();
-			this->temp = obj["temp"].as < String > ();
-			this->state = obj["state"].as < String > ();
-			this->duration = obj["duration"].as < String > ();
-			this->flap = obj["flap"].as < String > ();
-			this->calibrated = obj["calibrated"].as < String > ();
-
-		}
 	}
 	if (NULL != this->submit_UserCallback)
 	{
@@ -382,26 +372,6 @@ String base::Get_beep ( void )
 {
 	return this->beep;
 }
-void base::Set_program (String value)
-{
-	this->program = value;
-	this->Replace("program", this->program);
-}
-
-String base::Get_program ( void )
-{
-	return this->program;
-}
-void base::Set_version (String value)
-{
-	this->version = value;
-	this->Replace("version", this->version);
-}
-
-String base::Get_version ( void )
-{
-	return this->version;
-}
 void base::Set_temp (String value)
 {
 	this->temp = value;
@@ -411,16 +381,6 @@ void base::Set_temp (String value)
 String base::Get_temp ( void )
 {
 	return this->temp;
-}
-void base::Set_state (String value)
-{
-	this->state = value;
-	this->Replace("state", this->state);
-}
-
-String base::Get_state ( void )
-{
-	return this->state;
 }
 void base::Set_duration (String value)
 {
@@ -442,6 +402,16 @@ String base::Get_flap ( void )
 {
 	return this->flap;
 }
+void base::Set_state (String value)
+{
+	this->state = value;
+	this->Replace("state", this->state);
+}
+
+String base::Get_state ( void )
+{
+	return this->state;
+}
 void base::Set_calibrated (String value)
 {
 	this->calibrated = value;
@@ -451,6 +421,26 @@ void base::Set_calibrated (String value)
 String base::Get_calibrated ( void )
 {
 	return this->calibrated;
+}
+void base::Set_version (String value)
+{
+	this->version = value;
+	this->Replace("version", this->version);
+}
+
+String base::Get_version ( void )
+{
+	return this->version;
+}
+void base::Set_program (String value)
+{
+	this->program = value;
+	this->Replace("program", this->program);
+}
+
+String base::Get_program ( void )
+{
+	return this->program;
 }
 void base::Render( void )
 {

@@ -15,6 +15,7 @@ Flap::Flap(int pwmPin, int relaisPin)
   this->pwmPin = pwmPin;
   this->relaisPin = relaisPin;
   this->logger = Logger::instance();
+  this->position = 0;
 
   pinMode(relaisPin, OUTPUT);
   this->SwitchOff();

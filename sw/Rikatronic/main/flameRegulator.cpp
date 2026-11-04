@@ -54,6 +54,7 @@ FlameRegulator::programStateConfig_t FlameRegulator::programStateConfig[FLAP_PRO
     {FLAP_PROGRAM_STATE_HEAT_BURN_HOT3, FLAP_PROGRAM_STATE_HEAT_BURN_HOT3,  FLAP_PROGRAM_STATE_HEAT_BURN_HOT2,  1000,                   200,                92,                 30,  false },
     {FLAP_PROGRAM_STATE_HEAT_OFF,       FLAP_PROGRAM_STATE_HEAT_UP_START,   FLAP_PROGRAM_STATE_HEAT_OFF,        50,                      0,                  0,                 10,  false },
     {FLAP_PROGRAM_STATE_HEAT_RESCUE,    FLAP_PROGRAM_STATE_HEAT_BURN,   FLAP_PROGRAM_STATE_HEAT_OFF,            90,                     40,                 60,                120,  true }
+};
 
 FlameRegulator::programStateConfig_t FlameRegulator::programStateConfigEco[FLAP_PROGRAM_STATE_COUNT]=
         //state                                 nextstate                       laststate               tempForNextState    tempForLastState    currentFlapPosition     breakTimeSec
@@ -82,7 +83,7 @@ void timerCallback(void* pArg);
 
 //################################### member function #################################
 
-FlameRegulator::FlameRegulator(base* indexPage):
+FlameRegulator::FlameRegulator():
 flap{Flap(PWM_OUTPUT, RELAIS_OUTPUT)},
 tempSensor{TempSensor(ANALOG_INPUT)}
 {
@@ -92,7 +93,6 @@ tempSensor{TempSensor(ANALOG_INPUT)}
     this->RecogniceInitialState();
     this->mute = true;
     this->secondsToUnmute = -1;
-    this->indexPage = indexPage;
     pinMode(BEEP_PIN, OUTPUT);
     
 	// initialize tinmer
@@ -252,11 +252,6 @@ void FlameRegulator::ProgramStateMachine (void)
     }
     this->flap.SetPosition(currentConfig->currentFlapPosition);
 
-    this->indexPage->Set_flap(String(this->flap.GetPosition()));
-    this->indexPage->Set_slider(String(this->flap.GetPosition()));
-    this->indexPage->Set_temp(String(this->tempSensor.GetTemp()));
-    this->indexPage->Set_program(this->GetProgramStateStr());
-    this->indexPage->Set_state(this->GetFlapRegulationModeStr());
     this->action_timeSec = 10;    
 
     //check fallback temperature

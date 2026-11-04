@@ -2,7 +2,6 @@
 #include "Logger.hpp"
 #include "flap.hpp"
 #include "tempSensor.hpp"
-#include "base.hpp"
 
 class FlameRegulator
 {
@@ -41,7 +40,7 @@ public:
 	// callback functionpointertype for internal memberfunction 
 	typedef void (Flap::* flapFctPointer)(void);
 
-	FlameRegulator(base* indexPage);
+	FlameRegulator();
 
 	void ProgramStateMachine(); // oly accessed by timer
 
@@ -92,7 +91,6 @@ private:
 	Logger* logger;
 	int action_timeSec;
 	int secondsToUnmute;
-	base* indexPage;
 
 	// recognizes the initial state after startup
 	void RecogniceInitialState();

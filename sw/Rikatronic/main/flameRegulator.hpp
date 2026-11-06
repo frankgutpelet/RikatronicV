@@ -58,11 +58,11 @@ public:
 	// set and get the flap regulation mode	
 	void SetFlapRegulationMode(flapMode_e flapRegulationMode);
 	flapMode_e GetFlapRegulationMode() { return this->flapRegulationMode; }
-	String GetFlapRegulationModeStr();
+	const char* GetFlapRegulationModeStr();
 
 	// get the programstate (is not setable from outside)
 	FlapProgramState_e GetProgramState() { return this->programState; }
-	String GetProgramStateStr();
+	const char* GetProgramStateStr();
 
 	//wrapper functions for get position of the flap and temperature
 	int GetFlapPosition() { return this->flap.GetPosition(); }
@@ -95,5 +95,6 @@ private:
 
 	// recognizes the initial state after startup
 	void RecogniceInitialState();
+	void LogStateChange(FlapProgramState_e next);
 	
 };

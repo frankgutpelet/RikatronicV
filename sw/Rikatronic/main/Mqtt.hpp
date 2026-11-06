@@ -3,6 +3,7 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include "Save.hpp"
+#include "StackString.hpp"
 
 #define MQTT_MAX_VALUES 12
 
@@ -18,7 +19,7 @@ class MqttBridge
 		void Begin(MqttConfig* config, String clientId);
 		void SetCommandCallback(void (*callback)(const String& name, const String& value));
 		int  Add(const char* name);                    // Wert anmelden, liefert ID
-		void Publish(int id, const String& value);     // sendet nur bei Aenderung
+		void Publish(int id, const char* value);       // sendet nur bei Aenderung
 		void Apply();                                  // nach geaenderter Konfiguration aufrufen
 		void Loop();                                   // regelmaessig aus loop()
 		const char* State();                           // "aus", "getrennt", "verbunden"
@@ -38,6 +39,6 @@ class MqttBridge
 		bool afterConnect;            // true = Fenster fuer retained Befehle aktiv (siehe OnMessage)
 		int count;
 		const char* names[MQTT_MAX_VALUES];
-		String values[MQTT_MAX_VALUES];
+		char values[MQTT_MAX_VALUES][24];
 		bool dirty[MQTT_MAX_VALUES];
 };

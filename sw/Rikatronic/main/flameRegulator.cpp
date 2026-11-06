@@ -103,22 +103,33 @@ tempSensor{TempSensor(ANALOG_INPUT)}
 
 void FlameRegulator::SetFlapRegulationMode(flapMode_e flapRegulationMode)
 {
-    this->flapRegulationMode = flapRegulationMode;
+    {
+        StackString<80> m("[reg] mode "); m.append(this->GetFlapRegulationModeStr());
+        this->flapRegulationMode = flapRegulationMode;
+        m.append(" -> "); m.append(this->GetFlapRegulationModeStr());
+        m.append(" @"); m.append((long)(millis() / 1000)); m.append("s");
+        this->logger->Debug(m.c_str());
+    }
 
 }
 
-String FlameRegulator::GetFlapRegulationModeStr(void)
+const char* FlameRegulator::GetFlapRegulationModeStr(void)
 {
     return S_FlapRegulationModeString[this->flapRegulationMode];
 }
 
-String FlameRegulator::GetProgramStateStr()
+const char* FlameRegulator::GetProgramStateStr()
 {
     return S_ProgramStateString[this->programState];
 }
 
 void FlameRegulator::Heat_Up(void)
 {
+    {
+        StackString<80> m("[reg] HEAT_UP mode="); m.append(this->GetFlapRegulationModeStr());
+        m.append(" @"); m.append((long)(millis() / 1000)); m.append("s");
+        this->logger->Debug(m.c_str());
+    }
     flap.SwitchOff();
     flap.SetPosition(0);
     this->programState = FLAP_PROGRAM_STATE_HEAT_UP_START;
@@ -127,6 +138,13 @@ void FlameRegulator::Heat_Up(void)
 
 void FlameRegulator::Refill(void)
 {
+    {
+        StackString<96> m("[reg] REFILL mode="); m.append(this->GetFlapRegulationModeStr());
+        m.append(" prog="); m.append(this->GetProgramStateStr());
+        m.append(" flap="); m.append(this->flap.GetPosition());
+        m.append(" @"); m.append((long)(millis() / 1000)); m.append("s");
+        this->logger->Debug(m.c_str());
+    }
     this->flap.SwitchOff();
     this->programState = FLAP_PROGRAM_STATE_REFILL;
     this->action_timeSec = 60;
@@ -137,7 +155,7 @@ void FlameRegulator::SetManual(int pos)
 {
     if (FLAP_MODE_MANUAL != this->flapRegulationMode)
     {
-        logger->Error(String("cannot set the flap position in mode: ") + this->GetFlapRegulationModeStr());
+        { StackString<64> m("cannot set the flap position in mode: "); m.append(this->GetFlapRegulationModeStr()); logger->Error(m.c_str()); }
         return;
     }
     if (0 == pos)
@@ -149,7 +167,10 @@ void FlameRegulator::SetManual(int pos)
         this->flap.SwitchOn();
     }
 
-    this->logger->Debug("Set manual position");
+    {
+        StackString<48> m("[reg] manual position "); m.append(pos);
+        this->logger->Debug(m.c_str());
+    }
     this->flap.SetPosition(pos);
 }
 void FlameRegulator::Beep(bool swOn)
@@ -210,7 +231,7 @@ void FlameRegulator::ProgramStateMachine (void)
 
     if ((int) 0 <= this->secondsToUnmute)
     {
-        this->logger->Debug(String(secondsToUnmute));
+        { StackString<16> m; m.append(secondsToUnmute); this->logger->Debug(m.c_str()); }
         if (0 == this->secondsToUnmute)
         {
             this->mute = false;
@@ -238,7 +259,7 @@ void FlameRegulator::ProgramStateMachine (void)
     // do nothin if manual regulation
     if (FLAP_MODE_MANUAL == this->flapRegulationMode)
     {
-        this->logger->Debug("Flap Mode Manual - statemachine inactive");      
+        // kein Log pro Sekunde; der Moduswechsel selbst wird in SetFlapRegulationMode geloggt
         return;
     }
 
@@ -259,6 +280,7 @@ void FlameRegulator::ProgramStateMachine (void)
     if (this->tempSensor.GetTemp() < currentConfig->tempForLastState)
     {
         this->logger->Debug("Set last state");
+        this->LogStateChange(currentConfig->laststate);
         this->programState = currentConfig->laststate;
         this->action_timeSec = 0;
         return;
@@ -268,6 +290,7 @@ void FlameRegulator::ProgramStateMachine (void)
     if (this->tempSensor.GetTemp() >= currentConfig->tempForNextState)
     {
         this->logger->Debug("Set next state");
+        this->LogStateChange(currentConfig->nextstate);
         this->programState = currentConfig->nextstate;
         this->action_timeSec = currentConfig->breakTimeSec;
         return;
@@ -275,6 +298,15 @@ void FlameRegulator::ProgramStateMachine (void)
 }
 
 //###################################   private functions    ##############################
+void FlameRegulator::LogStateChange(FlapProgramState_e next)
+{
+    StackString<96> m("[reg] state "); m.append(this->GetProgramStateStr());
+    m.append(" -> "); m.append(S_ProgramStateString[(int)next]);
+    m.append(" temp="); m.append(this->tempSensor.GetTemp());
+    m.append(" @"); m.append((long)(millis() / 1000)); m.append("s");
+    this->logger->Debug(m.c_str());
+}
+
 void FlameRegulator::RecogniceInitialState(void)
 {
 
@@ -284,13 +316,13 @@ void FlameRegulator::RecogniceInitialState(void)
 
     while (temp >= config.tempForNextState)
     {
-        this->logger->Debug(String("new state: ") + this->GetProgramStateStr());
+        { StackString<64> m("new state: "); m.append(this->GetProgramStateStr()); this->logger->Debug(m.c_str()); }
         config = programStateConfig[config.nextstate];
     }
 
     this->programState = config.state;
     this->action_timeSec = 0;
-    this->logger->Debug(String("initial state is ") + this->GetProgramStateStr());
+    { StackString<64> m("initial state is "); m.append(this->GetProgramStateStr()); this->logger->Debug(m.c_str()); }
 }
 
 //###################################non member function ##############################

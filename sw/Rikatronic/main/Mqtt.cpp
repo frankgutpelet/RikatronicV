@@ -41,20 +41,21 @@ int MqttBridge::Add(const char* name)
 		return -1;
 	}
 	this->names[this->count] = name;
+	this->values[this->count][0] = 0;
 	this->dirty[this->count] = false;
 	return this->count++;
 }
 
-void MqttBridge::Publish(int id, const String& value)
+void MqttBridge::Publish(int id, const char* value)
 {
-	if (id < 0 || id >= this->count || value.length() == 0)
+	if (id < 0 || id >= this->count || NULL == value || 0 == value[0])
 	{
 		return;
 	}
 	// beim ersten Mal (leerer Zwischenspeicher) immer senden
-	if (this->values[id] != value || this->values[id].length() == 0)
+	if (0 != strcmp(this->values[id], value) || 0 == this->values[id][0])
 	{
-		this->values[id] = value;
+		strlcpy(this->values[id], value, sizeof(this->values[id]));
 		this->dirty[id] = true;
 	}
 }
@@ -80,8 +81,11 @@ const char* MqttBridge::State()
 
 void MqttBridge::Connect()
 {
-	String base = String(this->cfg->topic);
-	String lwt = base + "/status";
+	StackString<64> base(this->cfg->topic);
+	StackString<72> lwt(base.c_str());
+	lwt.append("/status");
+	StackString<80> subTopic(base.c_str());
+	subTopic.append("/+/set");
 	bool ok;
 
 	if (0 != this->cfg->user[0])
@@ -96,18 +100,19 @@ void MqttBridge::Connect()
 	if (!ok)
 	{
 		// rc: -2 Broker nicht erreichbar, 4 falsche Zugangsdaten, 5 nicht autorisiert
-		Serial.println(String("MQTT connect failed, rc=") + this->client.state());
+		Serial.print("MQTT connect failed, rc=");
+		Serial.println(this->client.state());
 	}
 	if (ok)
 	{
 		this->client.publish(lwt.c_str(), "online", true);
-		this->client.subscribe((base + "/+/set").c_str());
+		this->client.subscribe(subTopic.c_str());
 		this->subscribedAt = millis();
 		this->afterConnect = true;
 		// nach (Neu-)Verbindung alle Werte einmal senden
 		for (int i = 0; i < this->count; i++)
 		{
-			this->dirty[i] = (this->values[i].length() > 0);
+			this->dirty[i] = (0 != this->values[i][0]);
 		}
 	}
 }
@@ -119,20 +124,29 @@ void MqttBridge::OnMessage(char* topic, byte* payload, unsigned int length)
 		return;
 	}
 	// Topic: <base>/<name>/set
-	String t = String(topic);
-	String prefix = String(this->cfg->topic) + "/";
-	if (!t.startsWith(prefix) || !t.endsWith("/set"))
+	StackString<80> t(topic);
+	StackString<64> prefix(this->cfg->topic);
+	prefix.append('/');
+	if (!t.startsWith(prefix.c_str()) || !t.endsWith("/set"))
 	{
 		return;
 	}
-	String name = t.substring(prefix.length(), t.length() - 4);
-	if (name.length() == 0 || name.indexOf('/') >= 0)
+	char name[24];
+	size_t nameLen = t.length() - 4 - prefix.length();
+	if (t.length() < prefix.length() + 4 || nameLen == 0 || nameLen >= sizeof(name))
+	{
+		return;
+	}
+	memcpy(name, t.c_str() + prefix.length(), nameLen);
+	name[nameLen] = 0;
+	if (NULL != strchr(name, '/'))
 	{
 		return;
 	}
 	if (this->afterConnect && (millis() - this->subscribedAt) < RETAINED_WINDOW_MS)
 	{
-		Serial.println(String("MQTT ignored (retained command after connect): ") + name);
+		Serial.print("MQTT ignored (retained command after connect): ");
+		Serial.println(name);
 		return;
 	}
 	char buf[17];
@@ -173,19 +187,21 @@ void MqttBridge::Loop()
 
 	// pro Durchlauf nur einen Wert senden, damit die Verbindung zwischendurch
 	// arbeiten kann; bei Fehlern bleibt der Wert markiert und wird wiederholt
-	String base = String(this->cfg->topic);
 	for (int i = 0; i < this->count; i++)
 	{
 		if (this->dirty[i])
 		{
-			String topic = base + "/" + this->names[i];
-			if (this->client.publish(topic.c_str(), this->values[i].c_str(), true))
+			StackString<80> topic(this->cfg->topic);
+			topic.append('/');
+			topic.append(this->names[i]);
+			if (this->client.publish(topic.c_str(), this->values[i], true))
 			{
 				this->dirty[i] = false;
 			}
 			else
 			{
-				Serial.println(String("MQTT publish failed: ") + topic);
+				Serial.print("MQTT publish failed: ");
+				Serial.println(topic.c_str());
 			}
 			break;
 		}

@@ -75,10 +75,10 @@ bool parsePercent(String s, int* out)
 }
 
 // Modus fuer MQTT/Homey: manual / eco / power
-String modeName()
+StackString<12> modeName()
 {
-  String m = flameRegulator.GetFlapRegulationModeStr();
-  m.toLowerCase();
+  StackString<12> m(flameRegulator.GetFlapRegulationModeStr());
+  m.toLower();
   return m;
 }
 
@@ -175,7 +175,12 @@ bool applySetting(const String& name, const String& value)
 void onMqttCommand(const String& name, const String& value)
 {
   bool ok = applySetting(name, value);
-  Serial.println(String("MQTT rx: ") + name + " = '" + value + "' -> " + (ok ? "ok" : "rejected"));
+  Serial.print("MQTT rx: ");
+  Serial.print(name);
+  Serial.print(" = '");
+  Serial.print(value);
+  Serial.print("' -> ");
+  Serial.println(ok ? "ok" : "rejected");
   feedbackBeep(); // jeder MQTT-Befehl wird mit kurzem Piep bestaetigt
 }
 
@@ -192,6 +197,8 @@ void handleSubmit()
   }
   JsonObject obj = doc.as < JsonObject > ();
   bool ok = true;
+  Serial.print("[web] submit: ");
+  Serial.println(server.arg("action"));
 
   if (obj.containsKey("state"))
   {
@@ -302,7 +309,7 @@ void updatePage()
 {
   int temp = flameRegulator.GetTemperature();
   int flap = flameRegulator.GetFlapPosition();
-  String program = flameRegulator.GetProgramStateStr();
+  const char* program = flameRegulator.GetProgramStateStr();
 
   indexPage.Set_state(flameRegulator.GetFlapRegulationModeStr());
   indexPage.Set_program(program);
@@ -312,9 +319,12 @@ void updatePage()
   indexPage.Set_mqtt(mqtt.State());
 
   // MQTT: Werte werden nur bei Aenderung gesendet
-  mqtt.Publish(mqttTemp, String(temp));
-  mqtt.Publish(mqttFlap, String(flap));
-  mqtt.Publish(mqttMode, modeName());
+  char num[12];
+  snprintf(num, sizeof(num), "%d", temp);
+  mqtt.Publish(mqttTemp, num);
+  snprintf(num, sizeof(num), "%d", flap);
+  mqtt.Publish(mqttFlap, num);
+  mqtt.Publish(mqttMode, modeName().c_str());
   mqtt.Publish(mqttProgram, program);
   mqtt.Publish(mqttBeep, flameRegulator.mute ? "OFF" : "ON");
 }
@@ -333,6 +343,7 @@ void handleButton()
     else if (!buttonLongDone && (millis() - buttonDownSince) >= BUTTON_LONG_PRESS_MS)
     {
       buttonLongDone = true;
+      Serial.println("[button] long press -> heatup");
       applySetting("heatup", "ON");
     }
   }
@@ -342,7 +353,7 @@ void handleButton()
     buttonDownSince = 0;
     if (!buttonLongDone && held >= 30) // kurzer Druck, Prellen ignorieren
     {
-      Serial.println("refill");
+      Serial.println("[button] short press -> refill");
       flameRegulator.Refill();
     }
   }

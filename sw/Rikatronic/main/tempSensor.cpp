@@ -20,7 +20,7 @@ int TempSensor::GetTemp(void)
 	double resistance = this->GetResistance();
 	double temp = ((resistance - PT1000_0K_OFFSET) * PT1000_CURVE_PITCH);
   temp = ((temp * TMP_FACTOR) + TMP_OFFSET);
-	logger->Debug(String("temperature: ") + String(temp));
+	//{ StackString<40> m("temperature: "); m.append(temp); logger->Debug(m.c_str()); }
 	return (int) temp;
 }
 
@@ -28,14 +28,14 @@ double TempSensor::GetResistance(void)
 {
 	double voltage = this->GetVoltage();
 	double resistance = voltage * RESISTANCE_DEVIDER_R1 / (SYSTEM_VOLTAGE - voltage);
-	logger->Debug(String("Voltage: ") + String(voltage));
-	logger->Debug(String("Resistance: ") + String(resistance));
+	//{ StackString<40> m("Voltage: "); m.append(voltage); logger->Debug(m.c_str()); }
+	//{ StackString<40> m("Resistance: "); m.append(resistance); logger->Debug(m.c_str()); }
 	return resistance;
 }
 double TempSensor::GetVoltage(void)
 {
 	double tempValue = analogRead(this->analogInput);
-	logger->Debug(String("Temp value: ") + String(tempValue));
+	//{ StackString<40> m("Temp value: "); m.append(tempValue); logger->Debug(m.c_str()); }
 	return (SYSTEM_VOLTAGE * tempValue / ADC_RESOLUTION_HIGHEST);
 }
 

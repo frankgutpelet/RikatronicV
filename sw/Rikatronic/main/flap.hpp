@@ -20,4 +20,5 @@ private:
   Logger* logger;
   int pwmPin, relaisPin;
 	int position;
+	bool relayOn;
 };

@@ -15,7 +15,7 @@ Logger* Logger::instance()
 	return pInstance;
 }
 
-void Logger::Debug(String logstr)
+void Logger::Debug(const char* logstr)
 {
 #ifdef LOGLEVEL_DEBUG
 	this->Log(logstr);
@@ -24,7 +24,7 @@ void Logger::Debug(String logstr)
 #endif
 }
 
-void Logger::Error(String logstr)
+void Logger::Error(const char* logstr)
 {
 #ifdef LOGLEVEL_DEBUG
 	this->Log(logstr);
@@ -35,7 +35,7 @@ void Logger::Error(String logstr)
 #endif
 }
 
-void Logger::Log(String logstr)
+void Logger::Log(const char* logstr)
 {
 	Serial.println(logstr);
 }

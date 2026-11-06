@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include "StackString.hpp"
 #ifndef LOGGER_H
 # define LOGGER_H
 
@@ -10,9 +11,9 @@ public:
 	// Returns a reference to the singleton Logger object
 	static Logger* instance();
 
-	void Debug(String logstr);
+	void Debug(const char* logstr);
 
-	void Error(String logstr);
+	void Error(const char* logstr);
 
   Logger();
 
@@ -20,7 +21,7 @@ public:
 protected:
 
 private:
-	void Log(String logstr);
+	void Log(const char* logstr);
 
 };
 

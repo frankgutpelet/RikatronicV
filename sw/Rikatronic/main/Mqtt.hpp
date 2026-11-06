@@ -34,6 +34,8 @@ class MqttBridge
 		void (*commandCallback)(const String& name, const String& value);
 
 		unsigned long lastAttempt;
+		unsigned long subscribedAt;   // Zeitpunkt des letzten Abonnierens
+		bool afterConnect;            // true = Fenster fuer retained Befehle aktiv (siehe OnMessage)
 		int count;
 		const char* names[MQTT_MAX_VALUES];
 		String values[MQTT_MAX_VALUES];

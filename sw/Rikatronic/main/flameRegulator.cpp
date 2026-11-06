@@ -92,6 +92,7 @@ tempSensor{TempSensor(ANALOG_INPUT)}
     this->logger = Logger::instance();
     this->RecogniceInitialState();
     this->mute = true;
+    this->beepHold = false;
     this->secondsToUnmute = -1;
     pinMode(BEEP_PIN, OUTPUT);
     
@@ -222,7 +223,7 @@ void FlameRegulator::ProgramStateMachine (void)
         this->logger->Debug("Beep");
         this->ToggleBeep();
     }
-    else
+    else if (!this->beepHold)
     {
         this->Beep(false);
     }

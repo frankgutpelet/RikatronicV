@@ -320,7 +320,9 @@ pre { white-space: pre-wrap; margin: 10px 0 0; padding: 12px; background: var(--
 			"  " + t + "/mode/set    manual / eco / power\n" +
 			"  " + t + "/flap/set    0-100 (nur im Modus manual)\n" +
 			"  " + t + "/beep/set    ON / OFF / TEST\n" +
-			"  " + t + "/refill/set  ON = Nachlegen starten"
+			"  " + t + "/refill/set  beliebig (au\u00dfer 0/OFF) = Nachlegen starten\n" +
+			"  " + t + "/heatup/set  beliebig (au\u00dfer 0/OFF) = Anheizen starten (nicht im Modus manual)\n\n" +
+			"Taste am Ofen: kurz = Nachlegen, 3 s halten = Anheizen"
 	}
 
 	function fillMqtt(c)

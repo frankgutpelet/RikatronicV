@@ -25,7 +25,11 @@ MqttBridge mqtt;
 // IDs der MQTT-Werte (<topic>/<name>)
 int mqttTemp, mqttFlap, mqttMode, mqttProgram, mqttBeep;
 
+#define BUTTON_LONG_PRESS_MS 3000   // so lange Taste halten = Anheizen
+
 unsigned long lastPageUpdate = 0;
+unsigned long buttonDownSince = 0; // 0 = Taste nicht gedrueckt
+bool buttonLongDone = false;       // langer Druck wurde schon ausgewertet
 unsigned long beepTestUntil = 0;   // 0 = kein Testton aktiv
 
 // "on", "1", "true" -> true; "off", "0", "false" -> false
@@ -70,11 +74,31 @@ bool parsePercent(String s, int* out)
   return true;
 }
 
+// Modus fuer MQTT/Homey: manual / eco / power
 String modeName()
 {
   String m = flameRegulator.GetFlapRegulationModeStr();
   m.toLowerCase();
   return m;
+}
+
+#define FEEDBACK_BEEP_MS 200   // Bestaetigungs-Piep
+
+// Beeper nicht blockierend fuer ms Millisekunden einschalten (loop() schaltet wieder ab)
+void startBeep(unsigned long ms)
+{
+  unsigned long until = millis() + ms;
+  if (0 == until) until = 1;
+  if (0 == beepTestUntil || (long)(until - beepTestUntil) > 0) beepTestUntil = until; // laengeren Piep nicht verkuerzen
+  flameRegulator.beepHold = true;
+  flameRegulator.Beep(true);
+}
+
+// kurzer Bestaetigungs-Piep, nur wenn der Signalton nicht stumm geschaltet ist
+void feedbackBeep()
+{
+  if (flameRegulator.mute) return;
+  startBeep(FEEDBACK_BEEP_MS);
 }
 
 // Befehl ausfuehren: gemeinsamer Weg fuer Weboberflaeche und MQTT (<name>/set)
@@ -103,11 +127,23 @@ bool applySetting(const String& name, const String& value)
   }
   else if (name == "refill")
   {
-    if (!parseOnOff(value, &b)) return false;
-    if (b)
+    bool isOff = (parseOnOff(value, &b) && !b); // 0/off/false = nichts tun, alles andere loest aus
+    if (!isOff)
     {
       Serial.println("refill");
       flameRegulator.Refill();
+    }
+  }
+  else if (name == "heatup")
+  {
+    bool isOff = (parseOnOff(value, &b) && !b); // 0/off/false = nichts tun, alles andere loest aus
+    if (!isOff)
+    {
+      // im manuellen Modus laeuft der Zustandsautomat nicht, Anheizen waere wirkungslos
+      if (FlameRegulator::FLAP_MODE_MANUAL == flameRegulator.GetFlapRegulationMode()) return false;
+      Serial.println("heat up");
+      flameRegulator.Heat_Up();
+      feedbackBeep();
     }
   }
   else if (name == "beep")
@@ -118,9 +154,7 @@ bool applySetting(const String& name, const String& value)
     if (s == "TEST")
     {
       // nicht blockierend: loop() schaltet nach 1 s wieder ab
-      flameRegulator.Beep(true);
-      beepTestUntil = millis() + 1000;
-      if (0 == beepTestUntil) beepTestUntil = 1;
+      startBeep(1000);
     }
     else if (parseOnOff(s, &b))
     {
@@ -140,7 +174,9 @@ bool applySetting(const String& name, const String& value)
 
 void onMqttCommand(const String& name, const String& value)
 {
-  applySetting(name, value);
+  bool ok = applySetting(name, value);
+  Serial.println(String("MQTT rx: ") + name + " = '" + value + "' -> " + (ok ? "ok" : "rejected"));
+  feedbackBeep(); // jeder MQTT-Befehl wird mit kurzem Piep bestaetigt
 }
 
 // Weboberflaeche: POST /submit action={"state":"ECO"} / {"flap":"60"} / {"program":"REFILL"} / {"beep":"TEST"}
@@ -283,6 +319,35 @@ void updatePage()
   mqtt.Publish(mqttBeep, flameRegulator.mute ? "OFF" : "ON");
 }
 
+// Taste: kurz druecken = Nachlegen (beim Loslassen), 3 s halten = Anheizen
+void handleButton()
+{
+  if (RefillButton.IsPressed())
+  {
+    if (0 == buttonDownSince)
+    {
+      buttonDownSince = millis();
+      if (0 == buttonDownSince) buttonDownSince = 1;
+      buttonLongDone = false;
+    }
+    else if (!buttonLongDone && (millis() - buttonDownSince) >= BUTTON_LONG_PRESS_MS)
+    {
+      buttonLongDone = true;
+      applySetting("heatup", "ON");
+    }
+  }
+  else if (0 != buttonDownSince)
+  {
+    unsigned long held = millis() - buttonDownSince;
+    buttonDownSince = 0;
+    if (!buttonLongDone && held >= 30) // kurzer Druck, Prellen ignorieren
+    {
+      Serial.println("refill");
+      flameRegulator.Refill();
+    }
+  }
+}
+
 void setup(void)
 {
   /* set all values for webpage */
@@ -345,16 +410,12 @@ void loop(void)
   MDNS.update();
   mqtt.Loop();
 
-  if (RefillButton.IsPressed())
-  {
-    Serial.println("refill");
-    flameRegulator.Refill();
-    delay(200);
-  }
+  handleButton();
 
   if (0 != beepTestUntil && (long)(millis() - beepTestUntil) >= 0)
   {
     beepTestUntil = 0;
+    flameRegulator.beepHold = false;
     flameRegulator.Beep(false);
   }
 

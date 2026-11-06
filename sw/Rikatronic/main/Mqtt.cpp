@@ -1,12 +1,17 @@
 #include "Mqtt.hpp"
 
 static const unsigned long RETRY_MS = 10000;
+// Retained Befehle (liegen noch auf dem Broker) kommen direkt nach dem Abonnieren an.
+// Sie duerfen nicht ausgefuehrt werden, sonst wiederholt sich ein alter Befehl bei jedem Verbinden.
+static const unsigned long RETAINED_WINDOW_MS = 2000;
 
 MqttBridge::MqttBridge() : client(wifi)
 {
 	this->cfg = NULL;
 	this->commandCallback = NULL;
 	this->lastAttempt = 0;
+	this->subscribedAt = 0;
+	this->afterConnect = false;
 	this->count = 0;
 }
 
@@ -97,6 +102,8 @@ void MqttBridge::Connect()
 	{
 		this->client.publish(lwt.c_str(), "online", true);
 		this->client.subscribe((base + "/+/set").c_str());
+		this->subscribedAt = millis();
+		this->afterConnect = true;
 		// nach (Neu-)Verbindung alle Werte einmal senden
 		for (int i = 0; i < this->count; i++)
 		{
@@ -121,6 +128,11 @@ void MqttBridge::OnMessage(char* topic, byte* payload, unsigned int length)
 	String name = t.substring(prefix.length(), t.length() - 4);
 	if (name.length() == 0 || name.indexOf('/') >= 0)
 	{
+		return;
+	}
+	if (this->afterConnect && (millis() - this->subscribedAt) < RETAINED_WINDOW_MS)
+	{
+		Serial.println(String("MQTT ignored (retained command after connect): ") + name);
 		return;
 	}
 	char buf[17];

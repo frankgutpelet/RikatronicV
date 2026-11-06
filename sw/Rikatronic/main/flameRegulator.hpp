@@ -36,6 +36,7 @@ public:
 	}FlapProgramState_e;
 
 	bool mute; // Mute the beep 
+	bool beepHold; // true = Piep von aussen aktiv, Zustandsautomat schaltet den Beeper nicht aus
 	
 	// callback functionpointertype for internal memberfunction 
 	typedef void (Flap::* flapFctPointer)(void);
